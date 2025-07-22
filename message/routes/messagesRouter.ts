@@ -1,14 +1,18 @@
-import type { Request, Response } from "express";
-import { Router } from "express";
 import { messages } from "../data/messages.ts";
+import { Router } from "express";
+import type { Request, Response } from "express";
 
-export const newRouter = Router();
+export const messagesRouter = Router();
 
-newRouter.get("/", (_req: Request, res: Response) => {
+messagesRouter.get("/", (_req: Request, res: Response) => {
+  res.render("messages", { messages });
+});
+
+messagesRouter.get("/new", (_req: Request, res: Response) => {
   res.render("form");
 });
 
-newRouter.post("/", (req: Request, res: Response) => {
+messagesRouter.post("/new", (req: Request, res: Response) => {
   if (
     !req.body ||
     typeof req.body !== "object" ||
@@ -35,5 +39,5 @@ newRouter.post("/", (req: Request, res: Response) => {
     text,
     added: new Date(),
   });
-  res.redirect("/");
+  res.redirect("/messages");
 });

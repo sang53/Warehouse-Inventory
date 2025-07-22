@@ -1,8 +1,8 @@
+import "dotenv/config";
 import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { indexRouter } from "./routes/indexRouter.ts";
-import { newRouter } from "./routes/newRouter.ts";
+import { messagesRouter } from "./routes/messagesRouter.ts";
 
 const app = express();
 
@@ -13,8 +13,7 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
 
-app.use("/", indexRouter);
-app.use("/new", newRouter);
+app.use("/messages", messagesRouter);
 
 const PORT = process.env.PORT || 3000;
 console.log(`listening on port ${String(PORT)}!`);
