@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+  </head>
+  <body>
+    <%- include("partials/errors.ejs") %>
+    <h1><%= title %></h1>
+    <form
+      action="/users/<%= locals.user ? `${user.id}/update` : 'new' %>"
+      method="POST"
+    >
+      <label for="firstName">First Name: </label>
+      <input
+        type="text"
+        name="firstName"
+        id="firstName"
+        value="<%= locals.user ? user.firstName : '' %>"
+        required
+      />
+      <label for="lastName">Last Name: </label>
+      <input
+        type="text"
+        name="lastName"
+        id="lastName"
+        value="<%= locals.user ? user.lastName : '' %>"
+        required
+      />
+      <button type="submit">Submit</button>
+    </form>
+    <a href="/users">Back to users</a>
+    <a href="/">Back to home</a>
+  </body>
+</html>
