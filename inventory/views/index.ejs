@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Warehouse Inventory</title>
+  </head>
+  <body>
+    <%- include("partials/header.ejs") %>
+    <div class="main">
+      <h1>Overall Stats:</h1>
+      <div class="stats">
+        <p>Total Products: <%= products %></p>
+        <p>Total Locations: <%= locations %></p>
+        <p>Total Pallets: <%= pallets %></p>
+        <p>Total Stock: <%= stock %></p>
+      </div>
+      <form action="/" method="post">
+        <button type="submit">RESET</button>
+      </div>
+    </div>
+  </body>
+</html>

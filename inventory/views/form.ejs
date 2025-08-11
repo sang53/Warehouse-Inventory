@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+  </head>
+    <body>
+      <%- include ("partials/header.ejs") %>
+      <div class="main">
+        <h1><%= title %></h1>
+        <%- include ("partials/error.ejs") %>
+        <form action="<%= action %>" method="post">
+          <% fields.forEach((field, idx) => { %>
+            <label for="<%= `input-${idx}` %>"><%= field.data.text %></label>
+            <input id="<%= `input-${idx}` %>" 
+              <%- field.inputString %>
+            >
+          <% }); %>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+    </body>
+</html>

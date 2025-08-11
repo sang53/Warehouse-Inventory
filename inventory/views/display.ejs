@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %></title>
+  </head>
+  <body>
+    <%- include ("partials/header.ejs") %>
+    <div class="main">
+      <h1><%= title %></h1>
+      <%- include ("partials/error.ejs") %>
+      <a href="<%- `/${category}/new` %>">Add <%= category %></a>
+      <%- include("partials/table.ejs") %>
+    </div>
+  </body>
+</html>
