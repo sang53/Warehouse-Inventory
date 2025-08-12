@@ -4,8 +4,8 @@
   "type": "module",
   "description": "",
   "scripts": {
-    "lint": "eslint .",
-    "start": "pnpm nodemon $INIT_CWD/app.ts"
+    "lint": "eslint src/*",
+    "start": "pnpm nodemon src/app.ts"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +34,7 @@
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
+    "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "pg": "^8.16.3"
   }

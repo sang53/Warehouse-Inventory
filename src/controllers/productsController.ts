@@ -3,11 +3,11 @@ import {
   createProducts,
   getAllProducts,
   getProductById,
-} from "../db/queries.ts";
-import { FIELDS } from "../db/tableInfo.ts";
-import { getFormData } from "../utils/general.ts";
+} from "../src/db/queries.ts";
+import { FIELDS } from "../src/db/tableInfo.ts";
+import { getFormData } from "../src/utils/general.ts";
 import { body, matchedData, param } from "express-validator";
-import { checkValidation, standardiseError } from "../utils/error.ts";
+import { checkValidation, standardiseError } from "../src/utils/error.ts";
 import type { ValidationError } from "express-validator";
 
 export const productsGet = [

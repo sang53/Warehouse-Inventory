@@ -1,8 +1,8 @@
 import type { PoolClient } from "pg";
-import db from "./pool.ts";
-import { LOCATION_ROLES, TABLESCHEMAS, TNAMES } from "./tableInfo.ts";
+import db from "../config/pool.ts";
+import { LOCATION_ROLES, TABLESCHEMAS, TNAMES } from "../config/tableInfo.ts";
 
-import type { T_IN, T_OUT } from "./tableInfo.ts";
+import type { T_IN, T_OUT } from "../config/tableInfo.ts";
 
 export async function dropTables() {
   const client = await db.connect();

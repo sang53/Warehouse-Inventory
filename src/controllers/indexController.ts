@@ -5,7 +5,7 @@ import {
   getAllPallets,
   getAllPPA,
   getAllProducts,
-} from "../db/queries.ts";
+} from "../src/db/queries.ts";
 import type { Response, Request } from "express";
 
 export async function indexGet(_req: Request, res: Response) {
