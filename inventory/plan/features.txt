@@ -1,24 +1,7 @@
-Header:
-Links to products, location, etc
+User login with different roles:
+Admin - all access, create incoming & outgoing orders, track tasks
+Incoming - unload pallets into incoming => move from incoming to storage
+Picking - create pallet, given products to pick, move to location in outgoing
+Outgoing - check pallet, move out of warehouse
 
-Main page:
-Nothing for now.
-Planned:
-  show overview of all outstanding & completed tasks
-  stats of inventory - total products, total stock, total outstanding tasks, total completed tasks
-
-/products:
-table of all products
-links to specific product page
-
-/products/:id:
-table of all products of id
-can edit if has privileges
-
-/products/add:
-  add product form
-
-/products/:id/:uid/edit & delete:
-  edit or delete specific product
-
-
+Each non-admin user is assigned a task related to role

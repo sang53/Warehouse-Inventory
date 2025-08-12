@@ -1,0 +1,23 @@
+Header:
+Links to products, location, etc
+
+Main page:
+Nothing for now.
+Planned:
+  show overview of all outstanding & completed tasks
+  stats of inventory - total products, total stock, total outstanding tasks, total completed tasks
+
+/products:
+table of all products
+links to specific product page
+
+/products/:id:
+table of all products of id
+can edit if has privileges
+
+/products/add:
+  add product form
+
+/products/:id/:uid/edit & delete:
+  edit or delete specific product
+
