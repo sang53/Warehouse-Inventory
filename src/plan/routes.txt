@@ -16,7 +16,7 @@ login form
 POST /login:
 user verification
 => admin: redirect to /
-=> other: redirect to users/:id
+=> other: redirect to users/:id/task
 
 GET /logout:
 logout user
@@ -81,11 +81,13 @@ GET /locations:
 Filled/unfilled locations
 Table of locations information
 
+/* DELETE - maybe add functionality to edit locations in the future
 POST /locations/:id:
 Edit location information (admin or user w/ task)
 
 GET /locations/:id/edit:
-form to edit location (admin)
+form to edit location (admin) 
+*/
 
 
 PALLETS:
@@ -102,8 +104,9 @@ Pallet information
 POST /pallets/:id: 
 edit pallet information (admin or user)
 
-GET /pallets/:id/edit:
-Form to edit pallet
+/* CHANGE - only allow stock updates */
+GET /pallets/:pa_id/:p_id/edit:
+Form to edit stock of specific product
 
 
 TASKS:
@@ -122,11 +125,13 @@ task information
 POST /tasks/:id:
 task completed
 
+/* DELETE - prevent edit of tasks 
 GET /tasks/:id/edit:
 form to edit task
 
 POST /tasks/:id/edit
 edit task (admin)
+*/
 
 
 USERS:
@@ -142,8 +147,9 @@ add new user (admin)
 GET /users/:id:
 user information
 
+/* CHANGE - can only update role */
 GET /users/:id/edit:
-form to edit user
+form to edit user role (admin)
 
 POST /users/:id/edit:
 edit user
@@ -151,9 +157,11 @@ edit user
 GET /users/:id/task:
 details for current task for user
 
+/* ADD - way for user to get assigned task */
+POST /users/:id/task:
+Assign new task to user
+
+/* DELETE - avoid redundancy w/ POST /tasks/:id 
 POST /users/:id/task: 
 Complete current task
-
-
-
-
+*/
