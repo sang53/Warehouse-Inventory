@@ -1,17 +1,17 @@
-export enum L_Types {
+export const enum L_Types {
   INTAKE = "intake",
   STORAGE = "storage",
   OUTGOING = "outgoing",
 }
 
-export enum U_Types {
+export const enum U_Types {
   INTAKE = "intake",
   STORAGE = "storage",
   OUTGOING = "outgoing",
   ADMIN = "admin",
 }
 
-export enum Status {
+export const enum Status {
   INCOMING = "incoming",
   INTAKE = "intake",
   STORAGE = "storage",
@@ -24,7 +24,7 @@ export interface T_IN {
   };
   LOCATIONS: {
     l_name: string;
-    pa_id?: number;
+    pa_id?: number | null;
     l_role: L_Types;
     free?: boolean;
   };
@@ -40,17 +40,17 @@ export interface T_IN {
     u_role: U_Types;
   };
   TASKS: {
-    from_l_id?: number;
-    to_l_id?: number;
+    from_l_id?: number | null;
+    to_l_id?: number | null;
     t_status: Status;
-    pa_id?: number;
-    u_id?: number;
+    pa_id?: number | null;
+    u_id?: number | null;
   };
   ORDERS: {
     p_id: number;
     stock: number;
     complete?: boolean;
-    t_id?: number;
+    t_id?: number | null;
   };
 }
 
@@ -70,6 +70,7 @@ export interface T_OUT extends T_IN {
   USERS: T_IN["USERS"] & {
     u_id: number;
   };
+  PA_P_PA: T_OUT["PALLETS"] & T_OUT["P_PA"];
   TASKS: T_IN["TASKS"] & {
     t_id: number;
     from_l_id: number | null;

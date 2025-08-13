@@ -1,12 +1,12 @@
-export enum TNAMES {
-  PRODUCTS = "products",
-  PALLETS = "pallets",
-  LOCATIONS = "locations",
-  P_PA = "p_pa",
-  TASKS = "tasks",
-  ORDERS = "orders",
-  USERS = "users",
-}
+export const TNAMES = {
+  PRODUCTS: "products",
+  PALLETS: "pallets",
+  LOCATIONS: "locations",
+  P_PA: "p_pa",
+  TASKS: "tasks",
+  ORDERS: "orders",
+  USERS: "users",
+};
 
 const TABLETYPES = {
   location_type: `CREATE TYPE location_type AS ENUM ('intake', 'storage', 'outgoing');`,
@@ -40,14 +40,13 @@ const TABLESCHEMAS = {
     username TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     u_name TEXT NOT NULL,
-    u_role user_type NOT NULL,
+    u_role user_type NOT NULL
 );`,
   tasks: `CREATE TABLE tasks (
     t_id SERIAL PRIMARY KEY,
     from_l_id INT REFERENCES locations(l_id),
     to_l_id INT REFERENCES locations(l_id),
     t_status status NOT NULL,
-    t_t TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     pa_id INT REFERENCES pallets(pa_id),
     u_id INT REFERENCES users(u_id)
 );`,
