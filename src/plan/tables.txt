@@ -1,0 +1,45 @@
+users:
+id = (PK)
+username = unique string
+password = string
+name = string
+role = int
+task? = (FK)
+
+tasks:
+id = (PK)
+from = (FK) | null
+to = (FK) | null
+role = "intake" | "storage" | "outgoing"
+order? = (FK) <= changed relation to orders>task to better reflect business model
+pallet? = (FK)
+
+orders:
+id = serial
+product id = (FK)
+stock = int
+timestamp = now
+completed = boolean
+PK (id, productid)
+
+products:
+id = (PK)
+name = unique string
+
+locations:
+id = (PK) 
+name = unique string
+role = "intake" | "storage" | "outgoing"
+pallet? = (FK) 
+
+pallets:
+id = (PK)
+created = timestamp (now)
+status = "incoming" | "intake" | "storage" | "pick" | "outgoing" | "completed"
+
+product_pallet: <= remove and combine with pallet to remove redundancy
+product id = (FK)
+palletid = (FK)
+stock = int
+PK (pid, pa_id)
+

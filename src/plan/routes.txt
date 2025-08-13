@@ -1,23 +1,159 @@
-Header:
-Links to products, location, etc
+Header on every page:
+Links to major routes (including index)
 
-Main page:
-Nothing for now.
-Planned:
-  show overview of all outstanding & completed tasks
-  stats of inventory - total products, total stock, total outstanding tasks, total completed tasks
+INDEX:
+GET /:
+Totals: products, locations, pallets, stock, users, tasks
+? total orders pending/completed
+Current inputs
+Current orders
 
-/products:
+
+VERIFICATION: 
+GET /login:
+login form
+
+POST /login:
+user verification
+=> admin: redirect to /
+=> other: redirect to users/:id
+
+GET /logout:
+logout user
+
+
+INCOMING:
+GET /incoming:
+table of incoming stock
+
+GET /incoming/new:
+form to input incoming stock
+
+POST /incoming/new:
+confirm incoming stock
+
+
+ORDERS:
+GET /orders:
+table of all orders
+
+GET /orders/new:
+form for new order
+
+POST /orders/new:
+add new order
+
+GET /orders/:id:
+details of specific order
+
+
+PRODUCTS:
+GET /products:
 table of all products
-links to specific product page
 
-/products/:id:
-table of all products of id
-can edit if has privileges
+POST /products:
+search products by name
+=> redirect to /products/:id on success
 
-/products/add:
-  add product form
+GET /products/new:
+form to add new product
 
-/products/:id/:uid/edit & delete:
-  edit or delete specific product
+POST /product/new:
+validate & insert product (admin)
+
+GET /products/:id:
+Product details
+Locations with product
+Pallets with product
+
+POST /products/:id:
+order stock => incoming
+
+GET /products/:id/edit:
+form to edit product details 
+
+POST /products/:id/edit:
+edit product details (admin)
+
+
+LOCATIONS:
+GET /locations:
+Filled/unfilled locations
+Table of locations information
+
+POST /locations/:id:
+Edit location information (admin or user w/ task)
+
+GET /locations/:id/edit:
+form to edit location (admin)
+
+
+PALLETS:
+GET /pallets:
+Table of pallet information & location
+
+POST /pallets:
+Create new pallet
+=> redirect to /pallets/:id
+
+GET /pallets/:id:
+Pallet information
+
+POST /pallets/:id: 
+edit pallet information (admin or user)
+
+GET /pallets/:id/edit:
+Form to edit pallet
+
+
+TASKS:
+GET /tasks:
+table of all tasks & user if assigned
+
+GET /tasks/new:
+Form to add new task
+
+POST /tasks/new:
+Add new task
+
+GET /tasks/:id:
+task information
+
+POST /tasks/:id:
+task completed
+
+GET /tasks/:id/edit:
+form to edit task
+
+POST /tasks/:id/edit
+edit task (admin)
+
+
+USERS:
+GET /users:
+table of all users & assigned tasks (admin)
+
+GET /users/add:
+form to add new user
+
+POST users/add:
+add new user (admin)
+
+GET /users/:id:
+user information
+
+GET /users/:id/edit:
+form to edit user
+
+POST /users/:id/edit:
+edit user
+
+GET /users/:id/task:
+details for current task for user
+
+POST /users/:id/task: 
+Complete current task
+
+
+
 

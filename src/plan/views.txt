@@ -1,0 +1,7 @@
+Generic views (partials):
+table = automatically set up table using data
+
+error = insert error
+
+form = automatically set up form using data
+
