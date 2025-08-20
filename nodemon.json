@@ -1,3 +1,5 @@
 {
-  "ext": "ts,json, ejs"
+  "watch": ["src"],
+  "ext": "ts,json,ejs",
+  "exec": "node --loader ts-node/esm"
 }
