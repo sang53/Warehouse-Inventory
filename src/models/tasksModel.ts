@@ -1,11 +1,8 @@
 import { Status, T_OUT } from "../config/tableTypes.ts";
 import db from "../config/pool.ts";
-<<<<<<< HEAD
 import { TNAMES } from "../config/tableSchema.ts";
 import Pallet from "./palletsModel.ts";
 import parseOutput from "../utils/parseOutput.ts";
-=======
->>>>>>> 3927aec (create basic models)
 
 export default class Task {
   t_id: number;
@@ -14,10 +11,7 @@ export default class Task {
   pa_id: number | null;
   u_id: number | null;
   t_status: Status;
-<<<<<<< HEAD
   complete: string | null;
-=======
->>>>>>> 3927aec (create basic models)
 
   constructor(taskData: T_OUT["TASKS"]) {
     this.t_id = taskData.t_id;
