@@ -9,12 +9,11 @@
       <%- include ("partials/header.ejs") %>
       <div class="main">
         <h1><%= title %></h1>
-        <%- include ("partials/error.ejs") %>
         <form action="<%= action %>" method="post">
-          <% fields.forEach((field, idx) => { %>
-            <label for="<%= `input-${idx}` %>"><%= field.data.text %></label>
+          <% formData.forEach((field, idx) => { %>
+            <label for="<%= `input-${idx}` %>"><%= field.text %></label>
             <input id="<%= `input-${idx}` %>" 
-              <%- field.inputString %>
+              <%- field.inputAttributes %>
             >
           <% }); %>
           <button type="submit">Submit</button>

@@ -3,13 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title><%= title %></title>
+    <title>Error</title>
   </head>
   <body>
     <%- include ("partials/header.ejs") %>
-    <div class="main">
-      <h1><%= title %></h1>
-      <%- include("partials/table.ejs") %>
-    </div>
+    <div class="main"><%- include("partials/error.ejs") %></div>
   </body>
 </html>

@@ -1,8 +1,8 @@
-<% if (error.length) { %>
+<% if (errors.length) { %>
   <div class="error">
     <h1>Error: </h1>
     <ul>
-      <% error.forEach((e) => { %>
+      <% errors.forEach((e) => { %>
         <li><%= e %></li>
     <% }); %>
     </ul>
