@@ -1,55 +1,53 @@
 import type { NextFunction, Request, Response } from "express";
-import Product from "../models/productsModel.ts";
+import Order from "../models/ordersModel.ts";
+import { checkValidation, validateInt } from "../middlewares/validate.ts";
 import { matchedData } from "express-validator";
-import {
-  checkValidation,
-  validateAlphaNum,
-  validateInt,
-} from "../middlewares/validate.ts";
-import { T_IN } from "../config/tableTypes.ts";
 import getDisplayLocals from "../utils/getLocals/getDisplayLocals.ts";
 import getFormLocals from "../utils/getLocals/getFormLocals.ts";
 
-export const productsGet = [
+export const ordersGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
     res.locals = getDisplayLocals({
-      title: "Products",
-      tableData: await Product.getAll(),
+      title: "All Orders",
+      tableData: await Order.getAll(),
     });
     next();
   },
 ];
 
-export const productsNewGet = [
+export const ordersNewGet = [
   (_req: Request, res: Response, next: NextFunction) => {
     res.locals = getFormLocals({
-      title: "New Product",
-      action: "/products/new",
-      field: "PRODUCTS",
+      title: "New Order",
+      action: "/orders/new",
+      field: "ORDERS",
     });
     next();
   },
 ];
 
-export const productsNewPost = [
-  validateAlphaNum("p_name"),
+export const ordersNewPost = [
+  ...validateInt("p_id"),
+  ...validateInt("stock"),
   checkValidation,
   async (req: Request, res: Response) => {
-    const product = await Product.create(matchedData<T_IN["PRODUCTS"]>(req));
-    res.redirect(`/products/${String(product.p_id)}`);
+    const order = await Order.create(
+      matchedData<{ p_id: number; stock: number }>(req),
+    );
+    res.redirect(`/orders/${String(order.o_id)}`);
   },
 ];
 
-export const productsIDGet = [
+export const ordersIDGet = [
   ...validateInt("id"),
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
-    const product = await Product.get(id);
+    const order = await Order.get(id);
 
     res.locals = getDisplayLocals({
-      title: `Product ${String(product.p_id)}`,
-      tableData: [product],
+      title: `Order ${String(id)}`,
+      tableData: [order],
     });
     next();
   },
