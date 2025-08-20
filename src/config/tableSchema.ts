@@ -10,8 +10,8 @@ export const TNAMES = {
 
 const TABLETYPES = {
   location_type: `CREATE TYPE location_type AS ENUM ('intake', 'storage', 'outgoing');`,
-  status: `CREATE TYPE status AS ENUM ('incoming', 'intake', 'storage', 'pick', 'outgoing', 'completed');`,
-  user_type: `CREATE TYPE user_type AS ENUM('intake', 'storage', 'outgoing', 'admin')`,
+  status: `CREATE TYPE status AS ENUM ('arrival', 'intake', 'storage', 'pick', 'outgoing');`,
+  user_type: `CREATE TYPE user_type AS ENUM('intake', 'picker', 'outgoing', 'admin');`,
 };
 
 const TABLESCHEMAS = {
@@ -48,16 +48,20 @@ const TABLESCHEMAS = {
     to_l_id INT REFERENCES locations(l_id),
     t_status status NOT NULL,
     pa_id INT REFERENCES pallets(pa_id),
-    u_id INT REFERENCES users(u_id)
+    u_id INT REFERENCES users(u_id),
+    complete TIMESTAMP DEFAULT NULL
 );`,
   orders: `CREATE TABLE orders (
     o_id SERIAL NOT NULL,
     p_id INT NOT NULL REFERENCES products(p_id),
     stock INT NOT NULL CHECK (stock > 0),
-    complete BOOLEAN NOT NULL DEFAULT FALSE,
+    complete TIMESTAMP DEFAULT NULL,
     t_id INT REFERENCES tasks(t_id),
     PRIMARY KEY (o_id, p_id)
 );`,
 };
 
-export default Object.values(TABLETYPES).concat(Object.values(TABLESCHEMAS));
+export default {
+  TYPES: TABLETYPES,
+  TABLES: TABLESCHEMAS,
+};

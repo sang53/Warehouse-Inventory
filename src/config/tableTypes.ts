@@ -1,23 +1,23 @@
-export const enum L_Types {
+export enum Status {
+  INCOMING = "arrival",
   INTAKE = "intake",
   STORAGE = "storage",
   OUTGOING = "outgoing",
 }
 
-export const enum U_Types {
+export enum L_Types {
   INTAKE = "intake",
   STORAGE = "storage",
+  OUTGOING = "outgoing",
+}
+
+export enum U_Types {
+  INTAKE = "intake",
+  PICKER = "picker",
   OUTGOING = "outgoing",
   ADMIN = "admin",
 }
 
-export const enum Status {
-  INCOMING = "incoming",
-  INTAKE = "intake",
-  STORAGE = "storage",
-  OUTGOING = "outgoing",
-  COMPLETED = "compeleted",
-}
 export interface T_IN {
   PRODUCTS: {
     p_name: string;
@@ -49,7 +49,6 @@ export interface T_IN {
   ORDERS: {
     p_id: number;
     stock: number;
-    complete?: boolean;
     t_id?: number | null;
   };
 }
@@ -77,10 +76,11 @@ export interface T_OUT extends T_IN {
     to_l_id: number | null;
     pa_id: number | null;
     u_id: number | null;
+    complete: string | null;
   };
   ORDERS: T_IN["ORDERS"] & {
     o_id: number;
-    complete: boolean;
+    complete: string | null;
     t_id: number | null;
   };
 }
