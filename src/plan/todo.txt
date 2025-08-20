@@ -1,0 +1,11 @@
+Code the service layer
+Figure out better error handling => have error partial in certain views for more clarity
+add additional information to necessary routes/views
+add additional timestamp information to necesary tables
+Revisit display => probably separate into multiple views for all/individual
+Create script to enter in default/basic data
+
+additional functionality:
+configure locations
+locations are in a grid format => calculate distances and assign tasks based on distances
+add fake workers that automatically complete tasks to a set KPI
