@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { indexGet, indexPostReset } from "../controllers/indexController.ts";
+import { indexGet } from "../controllers/indexController.ts";
 
-export const indexRouter = Router();
+const indexRouter = Router();
 
 indexRouter.get("/", indexGet);
 
-indexRouter.post("/", indexPostReset);
+export default indexRouter;

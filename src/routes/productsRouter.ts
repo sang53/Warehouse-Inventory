@@ -1,14 +1,16 @@
 import { Router } from "express";
 import {
   productsGet,
-  productsIdGet,
+  productsIDGet,
   productsNewGet,
   productsNewPost,
 } from "../controllers/productsController.ts";
 
-export const productsRouter = Router();
+const productsRouter = Router();
 
 productsRouter.post("/new", productsNewPost);
 productsRouter.get("/new", productsNewGet);
-productsRouter.get("/:id", productsIdGet);
+productsRouter.get("/:id", productsIDGet);
 productsRouter.get("/", productsGet);
+
+export default productsRouter;
