@@ -5,13 +5,16 @@ export const TNAMES = {
   P_PA: "p_pa",
   TASKS: "tasks",
   ORDERS: "orders",
+  O_P: "o_p",
+  O_T: "o_t",
   USERS: "users",
-};
+} as const;
 
 const TABLETYPES = {
   location_type: `CREATE TYPE location_type AS ENUM ('intake', 'storage', 'outgoing');`,
-  status: `CREATE TYPE status AS ENUM ('arrival', 'intake', 'storage', 'pick', 'outgoing');`,
+  task_type: `CREATE TYPE task_type AS ENUM ('arrival', 'intake', 'storage', 'pick', 'outgoing', 'export');`,
   user_type: `CREATE TYPE user_type AS ENUM('intake', 'picker', 'outgoing', 'admin');`,
+  order_type: `CREATE TYPE order_type AS ENUM ('IN', 'OUT');`,
 };
 
 const TABLESCHEMAS = {
@@ -24,15 +27,14 @@ const TABLESCHEMAS = {
 );`,
   locations: `CREATE TABLE locations (
     l_id SERIAL PRIMARY KEY,
-    l_name VARCHAR(3) UNIQUE NOT NULL,
+    l_name TEXT UNIQUE NOT NULL,
     pa_id INT UNIQUE REFERENCES pallets(pa_id),
-    l_role location_type NOT NULL,
-    free BOOLEAN NOT NULL DEFAULT TRUE
+    l_role location_type NOT NULL
 );`,
   p_pa: `CREATE TABLE p_pa (
     p_id INT NOT NULL REFERENCES products(p_id),
     pa_id INT NOT NULL REFERENCES pallets(pa_id),
-    stock INT NOT NULL CHECK (stock > 0),
+    stock INT NOT NULL CHECK (stock >= 0),
     PRIMARY KEY (p_id, pa_id)
 );`,
   users: `CREATE TABLE users (
@@ -42,22 +44,32 @@ const TABLESCHEMAS = {
     u_name TEXT NOT NULL,
     u_role user_type NOT NULL
 );`,
-  tasks: `CREATE TABLE tasks (
-    t_id SERIAL PRIMARY KEY,
-    from_l_id INT REFERENCES locations(l_id),
-    to_l_id INT REFERENCES locations(l_id),
-    t_status status NOT NULL,
-    pa_id INT REFERENCES pallets(pa_id),
-    u_id INT REFERENCES users(u_id),
-    complete TIMESTAMP DEFAULT NULL
-);`,
   orders: `CREATE TABLE orders (
-    o_id SERIAL NOT NULL,
+    o_id SERIAL PRIMARY KEY,
+    placed TIMESTAMPTZ DEFAULT NOW(),
+    completed TIMESTAMPTZ,
+    o_type order_type NOT NULL
+);`,
+  o_p: `CREATE TABLE o_p (
+    o_id INT NOT NULL REFERENCES orders(o_id),
     p_id INT NOT NULL REFERENCES products(p_id),
     stock INT NOT NULL CHECK (stock > 0),
-    complete TIMESTAMP DEFAULT NULL,
-    t_id INT REFERENCES tasks(t_id),
     PRIMARY KEY (o_id, p_id)
+);`,
+  tasks: `CREATE TABLE tasks (
+    t_id SERIAL PRIMARY KEY,
+    l_id INT REFERENCES locations(l_id),
+    t_type task_type NOT NULL,
+    placed TIMESTAMPTZ DEFAULT NOW(),
+    started TIMESTAMPTZ,
+    completed TIMESTAMPTZ
+);`,
+  o_t: `CREATE TABLE o_t (
+    o_id INT NOT NULL REFERENCES orders(o_id),
+    t_id INT NOT NULL REFERENCES tasks(t_id),
+    pa_id INT REFERENCES pallets(pa_id),
+    u_id INT REFERENCES users(u_id),
+    PRIMARY KEY (o_id, t_id)
 );`,
 };
 

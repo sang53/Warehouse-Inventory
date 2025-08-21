@@ -1,8 +1,10 @@
-export enum Status {
+export enum T_Types {
   INCOMING = "arrival",
   INTAKE = "intake",
   STORAGE = "storage",
+  PICK = "pick",
   OUTGOING = "outgoing",
+  EXPORT = "export",
 }
 
 export enum L_Types {
@@ -18,15 +20,18 @@ export enum U_Types {
   ADMIN = "admin",
 }
 
+export enum O_Types {
+  IN = "IN",
+  OUT = "OUT",
+}
+
 export interface T_IN {
   PRODUCTS: {
     p_name: string;
   };
   LOCATIONS: {
     l_name: string;
-    pa_id?: number | null;
     l_role: L_Types;
-    free?: boolean;
   };
   P_PA: {
     p_id: number;
@@ -39,17 +44,22 @@ export interface T_IN {
     u_name: string;
     u_role: U_Types;
   };
-  TASKS: {
-    from_l_id?: number | null;
-    to_l_id?: number | null;
-    t_status: Status;
-    pa_id?: number | null;
-    u_id?: number | null;
-  };
   ORDERS: {
+    o_type: O_Types;
+  };
+  O_P: {
+    o_id: number;
     p_id: number;
     stock: number;
-    t_id?: number | null;
+  };
+  TASKS: {
+    t_type: T_Types;
+    l_id?: number | null;
+  };
+  O_T: {
+    o_id: number;
+    t_id: number;
+    pa_id?: number | null;
   };
 }
 
@@ -63,24 +73,24 @@ export interface T_OUT extends T_IN {
   LOCATIONS: T_IN["LOCATIONS"] & {
     l_id: number;
     pa_id: number | null;
-    free: boolean;
   };
-  P_PA: T_IN["P_PA"];
   USERS: T_IN["USERS"] & {
     u_id: number;
   };
-  PA_P_PA: T_OUT["PALLETS"] & T_OUT["P_PA"];
-  TASKS: T_IN["TASKS"] & {
-    t_id: number;
-    from_l_id: number | null;
-    to_l_id: number | null;
-    pa_id: number | null;
-    u_id: number | null;
-    complete: string | null;
-  };
   ORDERS: T_IN["ORDERS"] & {
     o_id: number;
-    complete: string | null;
-    t_id: number | null;
+    completed: Date | null;
+    placed: Date;
+  };
+  TASKS: T_IN["TASKS"] & {
+    t_id: number;
+    l_id: number | null;
+    placed: Date;
+    started: Date | null;
+    completed: Date | null;
+  };
+  O_T: T_IN["O_T"] & {
+    pa_id: number | null;
+    u_id: number | null;
   };
 }
