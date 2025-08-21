@@ -1,0 +1,7 @@
+Problem points:
+1. I did not have a clear enough idea of how to separate concerns. Resulted in re-organising the structure of the code to create clear deliniations between controllers & models. Originally, the controllers had all of the logic, which resulteed in the controllers becoming too complex. 
+In future projects, I will make sure to follow the MV* structure and make sure the model only handles the db i/o, while the controllers only gather data and pass on to the view.
+
+2. I did not do enough planning for this project, particular regarding the database tables. Knowing that insufficient planning was a common problem in past projects, I tried to have a solid plan, but I did not think about how the tables would relate to each other to store/provide the desired data. This problem was exacerbated by the fact that my planning consists of txt files, which cannot model relational databases very well. Perhaps drawing on paper/paint or using flowchart software will help make the planning easier.
+
+3. I ended up separating out the "view", where I have a end rendering middleware, with utility functions that help arrange the necessary view data in the controllers. I am not sure if that is the correct approach, but I think it would definitely scale better than calling render directly in every route.

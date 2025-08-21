@@ -1,9 +1,77 @@
 User login with different roles:
-Admin - all access, create incoming & outgoing orders, track tasks
+Admin - all access, create arrival & export orders, view all data
 Incoming - unload pallets into incoming => check pallet => move from incoming to storage
 Picking - create pallet, given products to pick, move to location in outgoing
 Outgoing - check pallet, move out of warehouse
 
-Each non-admin user is assigned a task related to role
+Functionality:
+
+1a. Place arrival order:
+  - create order => timestamp placed
+    - assign arrival products to order
+    - create pallet
+    - assign products to pallet
+    - find empty location in incoming
+    - create task to move pallet to incoming
+1b. Arrival => incoming
+  - assign user to task => timestamp start
+    - find & assign free incoming location to task
+    - update location to pending
+  - complete task => timestamp complete
+    - update pallet location
+    - create next task (check incoming) => timestamp placed
+      - assign new task to order
+      - assign pallet to task
+
+NOTES: 
+  have logic to skip arrival => incoming if incoming locations are full => error if no other tasks
+  have a placed timestamp in tasks & sort by placed to complete old tasks first
+
+1c. Check incoming
+  - assign user to task => timestamp
+    - get product list of order
+  - complete task => timestamp
+    - create next task (move to storage) => timestamp
+      - assign new task to order
+
+1d. Move to storage:
+  - assign user to task => timestamp
+    - find free storage location
+    - mark location as pending
+    - assign location to task
+  - complete task => timestamp
+    - assign pallet to location
+    - complete order => timestamp
+
+2a. Place export order:
+  - create order => timestamp
+    - create new task => timestamp
+      - assign task to order
+
+2b. Picking
+  - assign user to task => timestamp
+    - create pallet
+      - assign pallet to task
+    - get items & quantity to pick
+    - find & assign free outgoing location
+    - update location to pending
+  - complete task => timestamp
+    - update location
+    - create next task => timestamp
+      - assign new task to order
+
+2c. Check outgoing:
+  - assign user to task => timestamp
+    - get product list of order
+  - complete task => timestamp
+    - create next task (export)
+      - assign task to order
+
+2d. Export:
+  - assign user to task => timestamp
+    - update location to pending
+  - complete task => timestamp
+    - remove pallet from previous location
+    - complete order => timestamp
 
 Displays info & tables for each model - ./routes.txt
