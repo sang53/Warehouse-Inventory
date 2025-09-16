@@ -1,3 +1,4 @@
+// enum types for autocomplete
 export enum T_Types {
   INCOMING = "arrival",
   INTAKE = "intake",
@@ -25,10 +26,12 @@ export enum O_Types {
   OUT = "OUT",
 }
 
+// typed input & outputs for database tables
 export interface T_IN {
   PRODUCTS: {
     p_name: string;
   };
+  PALLETS: object; // for same keys as tablenames & correct extends to T_OUT
   LOCATIONS: {
     l_name: string;
     l_role: L_Types;
@@ -54,12 +57,16 @@ export interface T_IN {
   };
   TASKS: {
     t_type: T_Types;
-    l_id?: number | null;
   };
   O_T: {
     o_id: number;
+    t_id?: number | null;
+  };
+  TASKREL: {
     t_id: number;
+    l_id?: number | null;
     pa_id?: number | null;
+    u_id?: number | null;
   };
 }
 
@@ -84,12 +91,12 @@ export interface T_OUT extends T_IN {
   };
   TASKS: T_IN["TASKS"] & {
     t_id: number;
-    l_id: number | null;
     placed: Date;
     started: Date | null;
     completed: Date | null;
   };
-  O_T: T_IN["O_T"] & {
+  TASKREL: T_IN["TASKREL"] & {
+    l_id: number | null;
     pa_id: number | null;
     u_id: number | null;
   };

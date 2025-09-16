@@ -8,6 +8,7 @@ export const TNAMES = {
   O_P: "o_p",
   O_T: "o_t",
   USERS: "users",
+  TASKREL: "taskRels",
 } as const;
 
 const TABLETYPES = {
@@ -58,7 +59,6 @@ const TABLESCHEMAS = {
 );`,
   tasks: `CREATE TABLE tasks (
     t_id SERIAL PRIMARY KEY,
-    l_id INT REFERENCES locations(l_id),
     t_type task_type NOT NULL,
     placed TIMESTAMPTZ DEFAULT NOW(),
     started TIMESTAMPTZ,
@@ -66,10 +66,15 @@ const TABLESCHEMAS = {
 );`,
   o_t: `CREATE TABLE o_t (
     o_id INT NOT NULL REFERENCES orders(o_id),
+    t_id INT REFERENCES tasks(t_id),
+    PRIMARY KEY (o_id, t_id)
+);`,
+  taskRels: `CREATE TABLE taskRels (
     t_id INT NOT NULL REFERENCES tasks(t_id),
+    l_id INT REFERENCES locations(l_id),
     pa_id INT REFERENCES pallets(pa_id),
     u_id INT REFERENCES users(u_id),
-    PRIMARY KEY (o_id, t_id)
+    PRIMARY KEY(t_id, l_id, pa_id, u_id)
 );`,
 };
 
