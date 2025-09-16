@@ -16,6 +16,7 @@ import usersRouter from "./routes/usersRouter.ts";
 import authenticateRouter from "./routes/authenticateRouter.ts";
 import { parseError, renderErrorPage } from "./middlewares/errors.ts";
 import renderPage from "./middlewares/renderPage.ts";
+import { ensureAuthenticated } from "./middlewares/authenticate.ts";
 
 const app = express();
 
@@ -48,8 +49,13 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-//routes
+// exposed routes
 app.use("/", authenticateRouter);
+
+// authenticate middleware
+app.use(ensureAuthenticated);
+
+// routes
 app.use("/users", usersRouter);
 app.use("/tasks", tasksRouter);
 app.use("/pallets", palletsRouter);
