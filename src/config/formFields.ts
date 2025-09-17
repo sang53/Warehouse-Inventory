@@ -71,18 +71,4 @@ export default {
     },
     STOCK_FIELD,
   ],
-  LOGIN: [
-    {
-      text: "Username",
-      name: "username",
-      ...NAME_FIELD,
-      autofocus: true,
-    },
-    {
-      text: "Password",
-      name: "password",
-      type: "password",
-      required: true,
-    },
-  ],
 } as const;
