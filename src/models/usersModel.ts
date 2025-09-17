@@ -1,5 +1,6 @@
 import { T_IN, T_OUT, U_Types } from "../config/tableTypes.ts";
 import GeneralModel from "./generalModel.ts";
+import * as argon2 from "argon2";
 
 const TableName = "USERS" as const;
 type Input = T_IN[typeof TableName];
@@ -18,29 +19,30 @@ export default class User {
   }
 
   static async create(data: Input) {
-    const output = await GeneralModel.create(this.table, data);
+    data.password = await argon2.hash(data.password);
+    const output = await GeneralModel.create(User.table, data);
     return new User(output);
   }
 
   static async get(data: Partial<Output>) {
-    const output = await GeneralModel.get(this.table, data);
+    const output = await GeneralModel.get(User.table, data);
     const users = output.map((user) => new User(user));
     if (!users.length) throw new Error(`User not found`);
     return users as [User, ...User[]];
   }
 
   static async getAll() {
-    const output = await GeneralModel.get(this.table);
+    const output = await GeneralModel.get(User.table);
     return output.map((user) => new User(user));
   }
 
   static async update(data: Partial<Output>, conditions?: Partial<Output>) {
-    const output = await GeneralModel.update(this.table, data, conditions);
+    const output = await GeneralModel.update(User.table, data, conditions);
     return output.map((user) => new User(user));
   }
 
   static async getAuthUser(username: string) {
-    const output = await GeneralModel.get(this.table, { username });
+    const output = await GeneralModel.get(User.table, { username });
     const parsedOutput = GeneralModel.parseOutput(output, "User Not Found");
     return new VerifyUser(parsedOutput[0]);
   }

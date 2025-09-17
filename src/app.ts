@@ -63,8 +63,10 @@ app.use("/locations", locationsRouter);
 app.use("/orders", ordersRouter);
 app.use("/products", productsRouter);
 app.use("/", indexRouter);
-app.use("/", renderPage);
-app.use("/", parseError, renderErrorPage);
+
+// render page middleware
+app.use(renderPage);
+app.use(parseError, renderErrorPage);
 
 const PORT = process.env.PORT || 3000;
 console.log(`listening on port ${String(PORT)}!`);
