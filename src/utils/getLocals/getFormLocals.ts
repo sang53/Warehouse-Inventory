@@ -1,8 +1,12 @@
 import formFields from "../../config/formFields.ts";
-import { FormLocals } from "../../config/viewConfig.ts";
 
-export default function (data: FormLocals) {
-  const { title, action, field } = data;
+interface FormLocals {
+  title: string;
+  action: string;
+  field: keyof typeof formFields;
+}
+
+export default function ({ title, action, field }: FormLocals) {
   return {
     view: "form",
     viewData: {
@@ -12,26 +16,6 @@ export default function (data: FormLocals) {
     },
   };
 }
-
-/*
-function assertValidFormLocals(
-  data: Partial<FormLocals>,
-): asserts data is FormLocals {
-  const { title, action, field } = data;
-  if (
-    !title ||
-    typeof title !== "string" ||
-    !action ||
-    typeof action !== "string" ||
-    !field ||
-    typeof field !== "string" ||
-    !Object.keys(formFields).includes(field)
-  ) {
-    console.error("Invalid data for form: " + JSON.stringify(data));
-    throw new Error("System Error");
-  }
-}
-*/
 
 function getFormData(
   fields: keyof typeof formFields,

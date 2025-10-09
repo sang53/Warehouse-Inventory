@@ -9,6 +9,7 @@
       <%- include ("partials/header.ejs") %>
       <div class="main">
         <h1><%= title %></h1>
+        <%- include("partials/error.ejs") %>
         <form action="<%= action %>" method="post">
           <% formData.forEach((field, idx) => { %>
             <label for="<%= `input-${idx}` %>"><%= field.text %></label>

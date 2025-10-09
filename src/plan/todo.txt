@@ -1,4 +1,3 @@
-Update Locals & views to display intended info
 Go over controllers again
 Go over form fields to reflect changes
 Change display to include links to individual routes

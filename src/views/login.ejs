@@ -8,6 +8,7 @@
       <div class="main">
         <h1>Log In:</h1>
         <div class="content">
+          <%- include("partials/error.ejs") %>
           <form action="/login" method="POST">
             <label for="username">Username:</label>
             <input

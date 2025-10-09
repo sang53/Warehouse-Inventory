@@ -1,7 +1,11 @@
-import { DisplayLocals } from "../../config/viewConfig.ts";
+import { T_OUT } from "../../config/tableTypes.ts";
 
-export default function (data: DisplayLocals) {
-  const { title, tableData } = data;
+interface DisplayLocals {
+  title: string;
+  tableData: Partial<T_OUT[keyof T_OUT]>[];
+}
+
+export default function ({ title, tableData }: DisplayLocals) {
   return {
     view: "display",
     viewData: {

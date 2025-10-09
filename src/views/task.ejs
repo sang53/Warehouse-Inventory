@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Task <%= task.t_id %></title>
+    <body>
+      <%- include("partials/header.ejs") %>
+      <div class="main">
+        <h1>Task <%= task.t_id %> Details</h1>
+        <%- include("partials/table.ejs", { tableData: [task] }) %>
+        <h1>Order <%= order.o_id %></h1>
+        <%- include("partials/table.ejs", { tableData: [order] }) %>
+        <h1>Products</h1>
+        <%- include("partials/table.ejs", { tableData: products }) %>
+      </div>
+    </body>
+  </head>
+</html>
