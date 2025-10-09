@@ -1,7 +1,21 @@
 Problem points:
-1. I did not have a clear enough idea of how to separate concerns. Resulted in re-organising the structure of the code to create clear deliniations between controllers & models. Originally, the controllers had all of the logic, which resulteed in the controllers becoming too complex. 
-In future projects, I will make sure to follow the MV* structure and make sure the model only handles the db i/o, while the controllers only gather data and pass on to the view.
+1. MV* Model
+I did not have a clear enough idea of how to separate concerns. Resulted in re-organising the structure of the code to create clear deliniations between controllers, models and service. Originally, the controllers had all of the logic, which resulted in the controllers becoming too complex. 
+In future projects, I will make sure to follow the MV* structure and make sure the model only handles the db i/o, while the controllers gather & transform data and pass on to the view.
 
-2. I did not do enough planning for this project, particular regarding the database tables. Knowing that insufficient planning was a common problem in past projects, I tried to have a solid plan, but I did not think about how the tables would relate to each other to store/provide the desired data. This problem was exacerbated by the fact that my planning consists of txt files, which cannot model relational databases very well. Perhaps drawing on paper/paint or using flowchart software will help make the planning easier.
+2. Planning:
+I did not do enough planning for this project, particular regarding the database tables. Knowing that insufficient planning was a common problem in past projects, I tried to have a solid plan, but I did not think about how the tables would relate to each other to store/provide the desired data. This problem was exacerbated by the fact that my planning consists of txt files, which cannot model relational databases very well. Perhaps drawing on paper/paint or using flowchart software will help make the planning easier. I think this was mostly an unavoidable problem, as this is my first time working backend with databases.
 
-3. I ended up separating out the "view", where I have a end rendering middleware, with utility functions that help arrange the necessary view data in the controllers. I am not sure if that is the correct approach, but I think it would definitely scale better than calling render directly in every route.
+3. Generality:
+I think I placed too much focus on my models being too general for what the project is.
+While functions/classes being general is good in cases of large projects that may have extended functionality in the future, a smaller project (such as this one) with a concrete end does not require any more generality than is required.
+A large portion of my time was spent making everything as general as possible: such as the entire GeneralModel, .get/.update functions accepting any conditions/limits/orders, and TNAMES/T_IN/T_OUT typings. I think more specialised classes/functions/typings for my use cases would have been sufficient and much faster to write.
+I view this as my largest problem for this project, as I spent a significant amount of time and effort, just for half of what I wrote to be wasted. Furthermore, as queries became more complex with multiple joins in the service layer, I had to revert back to making specialised functions anyways, resulting in convoluted code that is neither general or specialised.
+
+3. Ambiguous Model Classes
+As some relational data is separated into different tables, I should have separated models that have receieved that additional information vs not. Eg: task.l_id, which I typed as number | null | undefined. This lead to problems in complexity of code, due to always checking for null vs undefined and more complicated typing. It also decreased the readability of code as it is ambiguous what a Task object exactly contains, and what data still needs to be fetched.
+In the future, I will create distinct subclasses, which will be instanced when relational data from multiple tables is necessary.
+
+5. AI Workflow Integration:
+I did not use AI as efficient as I could while writing this project. I should be more wiling to ask AI if my approach is the best method, or query alternate approaches if I am not sure about how to handle a particular problem. There should be no reason why I write a large section of functionality, only to realise that there was an easier and/or more efficient way to have done the same thing. One example of this is updating multiple rows of a table in one query using VALUES. Thinking about it now, of course there is a way to handle this commonly occuring issue, but it just never crossed my mind. I only realised late into project, when AI gave me a suggestion after asking it an unrelated question about my code.
+In the future, when I am tackling a difficult problem or thinking about how to approach a new problem, I should use AI for suggestions. Of course, AI cannot be taken as complete truth, but the suggestions are an easy starting point for further thinking/research.

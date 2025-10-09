@@ -1,15 +1,4 @@
-Code the service layer
-Figure out better error handling => have error partial in certain views for more clarity
-add additional information to necessary routes/views
-add additional timestamp information to necesary tables
-Revisit display => probably separate into multiple views for all/individual
-Create script to enter in default/basic data => Bat file to execute according to full reset vs data reset
-
-additional functionality:
-Change picking process => separate into each mini-task, complete as you go so that data is kept in the middle of the picking task.
-Allow multi-product pallet arrivals => combine pallets in incoming. Will need to track how many products per layer & max number of layers
-Allow multi-pallet storage => introduce racks and put above current location with the same product || find nearest location above product. Will need to introduce new user role (high reach) & new intermediate location (for high reach to get product => move to rack). 
-configure locations on the fly
-locations are in a grid format => calculate distances and assign tasks based on distances
-add fake workers that automatically complete tasks to a set KPI
-scripts to remove old data (if necesary)
+Update Locals & views to display intended info
+Go over controllers again
+Go over form fields to reflect changes
+Change display to include links to individual routes
