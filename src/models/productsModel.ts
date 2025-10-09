@@ -20,15 +20,17 @@ export default class Product {
     return new Product(output);
   }
 
-  static async get(data: Partial<Output>) {
-    const output = await GeneralModel.get(this.table, data);
-    return GeneralModel.parseOutput(
-      output.map((product) => new Product(product)),
-    );
+  static async get(data: Partial<Output>, limit?: number | null) {
+    const output = await GeneralModel.get(this.table, {
+      conditions: data,
+      limit,
+    });
+    const products = output.map((product) => new Product(product));
+    return GeneralModel.parseOutput(products, "Product Not Found");
   }
 
   static async getAll() {
-    const output = await GeneralModel.get(this.table);
+    const output = await GeneralModel.get(this.table, { limit: 50 });
     return output.map((product) => new Product(product));
   }
 

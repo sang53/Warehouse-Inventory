@@ -1,28 +1,6 @@
-import { T_OUT } from "../config/tableTypes.ts";
-import formFields from "../config/formFields.ts";
-
-export const VIEWS = {
-  DISPLAY: "display",
-  FORM: "form",
+export const DISPLAY_DATA = {
+  USER: ["u_role", "u_name", "u_id"],
+  TASK: ["t_id", "t_type", "l_id", "placed", "started", "completed"],
+  ORDER: ["o_id", "o_type", "placed", "completed", "t_id"],
+  PALLET: ["pa_id"],
 } as const;
-
-export interface ViewLocals {
-  display: DisplayLocals;
-  form: FormLocals;
-}
-
-export interface DisplayLocals {
-  title: string;
-  tableData: Partial<T_OUT[keyof T_OUT]>[];
-}
-
-export interface FormLocals {
-  title: string;
-  action: string;
-  field: keyof typeof formFields;
-}
-
-export interface FilledLocals {
-  view: keyof ViewLocals;
-  viewData: ViewLocals[keyof ViewLocals];
-}

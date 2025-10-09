@@ -66,15 +66,14 @@ const TABLESCHEMAS = {
 );`,
   o_t: `CREATE TABLE o_t (
     o_id INT NOT NULL REFERENCES orders(o_id),
-    t_id INT REFERENCES tasks(t_id),
+    t_id INT NOT NULL REFERENCES tasks(t_id),
     PRIMARY KEY (o_id, t_id)
 );`,
   taskRels: `CREATE TABLE taskRels (
-    t_id INT NOT NULL REFERENCES tasks(t_id),
+    t_id INT PRIMARY KEY REFERENCES tasks(t_id),
     l_id INT REFERENCES locations(l_id),
     pa_id INT REFERENCES pallets(pa_id),
-    u_id INT REFERENCES users(u_id),
-    PRIMARY KEY(t_id, l_id, pa_id, u_id)
+    u_id INT REFERENCES users(u_id)
 );`,
 };
 

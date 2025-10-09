@@ -32,7 +32,7 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((user: number, done) => {
   void (async () => {
     try {
-      const userObj = await User.get({ u_id: user });
+      const userObj = (await User.get({ u_id: user }))[0];
       done(null, userObj);
       return;
     } catch (error) {

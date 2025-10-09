@@ -1,62 +1,118 @@
-import { T_OUT } from "../config/tableTypes.ts";
-import db from "../config/pool.ts";
 import { TNAMES } from "../config/tableSchema.ts";
-import parseOutput from "../utils/parseOutput.ts";
-import type { PoolClient } from "pg";
+import { T_OUT } from "../config/tableTypes.ts";
+import GeneralModel from "./generalModel.ts";
+import { LocationData } from "./locationsModel.ts";
+import db from "../config/pool.ts";
 
+type PaOutput = T_OUT["PALLETS"];
+type POutput = T_OUT["P_PA"];
+
+// Basic Pallet Model
 export default class Pallet {
+  static PalletTable = "PALLETS" as const;
   pa_id: number;
-  products?: Map<number, number>;
 
-  constructor(pa_id: number, palletData?: T_OUT["PA_P_PA"][]) {
+  constructor({ pa_id }: PaOutput) {
     this.pa_id = pa_id;
-    this.products = palletData
-      ? new Map(palletData.map(({ p_id, stock }) => [p_id, stock]))
-      : undefined;
   }
 
-  async setStock(p_id: number, stock: number, client?: PoolClient) {
-    if (!this.products || !this.products.has(p_id))
-      throw new Error(
-        `Product ${String(p_id)} Not On Pallet ${String(this.pa_id)}`,
-      );
-    const connection = client || db;
-    await connection.query(
-      `UPDATE ${TNAMES.P_PA}
-      SET stock = $1
-      WHERE pa_id = $2
-        AND p_id = $3;`,
-      [stock, this.pa_id, p_id],
-    );
-    this.products.set(p_id, stock);
-  }
-
-  static async get(id: number) {
-    const data = await db.query<T_OUT["PA_P_PA"]>(
-      `SELECT * FROM ${TNAMES.PALLETS} 
-      JOIN ${TNAMES.P_PA}
-      ON ${TNAMES.PALLETS}.pa_id = ${TNAMES.P_PA}.pa_id
-      WHERE pa_id = $1;`,
-      [id],
-    );
-    const palletData = parseOutput(data.rows, `Pallet ${String(id)} Not Found`);
-    return new Pallet(palletData[0].pa_id, palletData);
+  static async create() {
+    const output = await GeneralModel.create(Pallet.PalletTable);
+    return new Pallet(output);
   }
 
   static async getAll() {
-    const data = await db.query<T_OUT["PALLETS"]>(
-      `SELECT * FROM ${TNAMES.PALLETS};`,
-    );
-    return data.rows.map(({ pa_id }) => new Pallet(pa_id));
+    const output = await GeneralModel.get(Pallet.PalletTable, {
+      limit: 50,
+      desc: true,
+      order: ["pa_id"],
+    });
+    return output.map((pallet) => new Pallet(pallet));
   }
 
-  static async create(client?: PoolClient) {
-    const connection = client || db;
-    const data = await connection.query<T_OUT["PALLETS"]>(
-      `INSERT INTO ${TNAMES.PALLETS} RETURNING *;`,
+  async getProducts() {
+    const output = await GeneralModel.get(ProductPallet.ProductTable, {
+      conditions: {
+        pa_id: this.pa_id,
+      },
+      limit: null,
+    });
+    return new ProductPallet(this, output);
+  }
+}
+
+// Pallet Model with Products
+export class ProductPallet extends Pallet {
+  static ProductTable = "P_PA" as const;
+
+  // joins pallets & pallet_products table
+  static joinQuery = `${TNAMES[ProductPallet.ProductTable]} AS a
+  LEFT JOIN ${TNAMES[Pallet.PalletTable]} AS b
+  ON a.pa_id = b.pa_id`;
+
+  // Map: {p_id: stock}
+  products: Map<number, number>;
+
+  constructor(pallet: PaOutput, products: POutput[]) {
+    super(pallet);
+    this.products = this.#initProducts(products);
+  }
+
+  // create .products map
+  #initProducts(products: POutput[]) {
+    return new Map(products.map(({ p_id, stock }) => [p_id, stock]));
+  }
+
+  static async get(data: PaOutput) {
+    const output = await GeneralModel.getJoin<PaOutput, POutput>(
+      ProductPallet.joinQuery,
+      "a",
+      { conditions: data },
     );
-    return new Pallet(
-      parseOutput(data.rows, `Pallet Creation Failed`)[0].pa_id,
+    return new ProductPallet({ pa_id: data.pa_id }, output);
+  }
+
+  static async removeProducts(data: LocationData[]) {
+    const query = `
+    UPDATE p_pa
+    SET stock = stock - $3
+    WHERE p_id = $1 AND pa_id = $2
+  `;
+
+    await Promise.allSettled(
+      data.map(({ p_id, pa_id, stock }) =>
+        db.query(query, [p_id, pa_id, stock]),
+      ),
+    );
+  }
+
+  async addProduct(p_id: number, stock: number) {
+    const newStock = this.products.get(p_id) ?? 0 + stock;
+
+    if (this.products.has(p_id))
+      // product already on pallet => update existing row
+      await GeneralModel.update(
+        ProductPallet.ProductTable,
+        { stock: newStock },
+        { pa_id: this.pa_id, p_id },
+      );
+    else
+      // create new row for product
+      await GeneralModel.create(ProductPallet.ProductTable, {
+        stock,
+        pa_id: this.pa_id,
+        p_id,
+      });
+
+    this.products.set(p_id, newStock);
+    return this;
+  }
+
+  async addProductsMap(products: Map<number, number>) {
+    await Promise.allSettled(
+      Array.from(products).map(([p_id, stock]) => {
+        return this.addProduct(p_id, stock);
+      }),
     );
   }
 }

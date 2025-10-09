@@ -1,73 +1,140 @@
-import { Status, T_OUT } from "../config/tableTypes.ts";
-import db from "../config/pool.ts";
+import { T_IN, T_OUT, TaskType } from "../config/tableTypes.ts";
 import { TNAMES } from "../config/tableSchema.ts";
-import Pallet from "./palletsModel.ts";
-import parseOutput from "../utils/parseOutput.ts";
+import GeneralModel from "./generalModel.ts";
+
+const TableName = "TASKS" as const;
+const RelsTable = "TASKREL" as const;
+
+type Input = T_IN[typeof TableName];
+type Output = T_OUT[typeof TableName];
+type Rels = T_OUT[typeof RelsTable];
 
 export default class Task {
   t_id: number;
-  from_l_id: number | null;
-  to_l_id: number | null;
-  pa_id: number | null;
+  t_type: TaskType;
+  placed: Date;
+  started: Date | null;
+  completed: Date | null;
+
+  static table = TableName;
+
+  constructor(data: Output) {
+    this.t_id = data.t_id;
+    this.t_type = data.t_type;
+    this.placed = data.placed;
+    this.started = data.started;
+    this.completed = data.completed;
+  }
+
+  static async get(data: Partial<Output>, limit?: number | null) {
+    const output = await GeneralModel.get(Task.table, {
+      conditions: data,
+      limit,
+    });
+    const tasks = output.map((task) => new Task(task));
+    return GeneralModel.parseOutput(tasks, "Task Not Found");
+  }
+
+  static async getAll() {
+    const output = await GeneralModel.get(Task.table, { limit: 50 });
+    return output.map((task) => new Task(task));
+  }
+
+  static async getNewByTypes(types: TaskType[]) {
+    const output = await GeneralModel.getArray(this.table, "t_type", types, {
+      order: ["placed"],
+      conditions: { started: null },
+    });
+    if (!output[0]) return null;
+    return new Task(output[0]);
+  }
+
+  async setStart(value: boolean = true) {
+    if ((this.started && value) || (!this.started && !value))
+      throw new Error(`Task ${String(this.t_id)} already started`);
+    await this.#timestamp("started", value);
+    return this;
+  }
+
+  async complete() {
+    if (this.completed)
+      throw new Error(`Task ${String(this.t_id)} already completed`);
+    await this.#timestamp("completed");
+    return this;
+  }
+
+  async #timestamp(column: "started" | "completed", value: boolean = true) {
+    this[column] = await GeneralModel.timestamp(
+      Task.table,
+      column,
+      {
+        t_id: this.t_id,
+      },
+      value,
+    );
+  }
+
+  async updateRels(data: Partial<Rels>) {
+    const output = await GeneralModel.update(FullTask.RelsTable, data, {
+      t_id: this.t_id,
+    });
+    return Object.assign(this, output[0]);
+  }
+}
+
+export class FullTask extends Task {
+  static RelsTable = RelsTable;
+  static joinQuery = `${TNAMES[Task.table]} AS a
+    LEFT JOIN ${TNAMES[FullTask.RelsTable]} AS b
+    ON a.t_id = b.t_id`;
+
+  pa_id: number;
+  l_id: number | null;
   u_id: number | null;
-  t_status: Status;
-  complete: string | null;
 
-  constructor(taskData: T_OUT["TASKS"]) {
-    this.t_id = taskData.t_id;
-    this.from_l_id = taskData.from_l_id;
-    this.to_l_id = taskData.to_l_id;
-    this.pa_id = taskData.pa_id;
-    this.u_id = taskData.u_id;
-    this.t_status = taskData.t_status;
-    this.complete = taskData.complete;
+  constructor(task: Output, data: Rels) {
+    super(task);
+    this.l_id = data.l_id;
+    this.pa_id = data.pa_id;
+    this.u_id = data.u_id;
   }
 
-  async addPallet(pallet: Pallet) {
-    if (this.pa_id) {
-      throw new Error(`Pallet already assigned to task`);
-    }
-    await db.query(
-      `UPDATE ${TNAMES.PALLETS} 
-      SET pa_id = $1
-      WHERE t_id = $2;`,
-      [pallet.pa_id, this.t_id],
-    );
-    this.pa_id = pallet.pa_id;
-    return this;
+  static async create(
+    data: Input,
+    pa_id: number,
+    rels?: { u_id?: number | null; l_id?: number | null },
+  ) {
+    const output = await GeneralModel.create(Task.table, data);
+    const relsOutput = await GeneralModel.create(this.RelsTable, {
+      ...rels,
+      pa_id,
+      t_id: output.t_id,
+    });
+    return new FullTask(output, relsOutput);
   }
 
-  async setComplete() {
-    if (this.complete)
-      throw new Error(`Task ${String(this.t_id)} Already Completed`);
-    const data = await db.query<T_OUT["ORDERS"]>(
-      `UPDATE ${TNAMES.ORDERS} 
-      SET complete = NOW()::timestamp
-      WHERE t_id = $1;`,
-      [this.t_id],
+  static async getFull(
+    data: Partial<Output & Rels>,
+    order?: Extract<keyof Output | keyof Rels, string>[],
+    limit?: number | null,
+    desc?: boolean,
+  ) {
+    const output = await GeneralModel.getJoin<Output, Rels>(
+      this.joinQuery,
+      "a",
+      { conditions: data, order, limit, desc },
     );
-    const taskData = parseOutput(
-      data.rows,
-      `Task ${String(this.t_id)} does not exist`,
-    );
-    this.complete = taskData[0].complete;
-    return this;
+    const tasks = output.map((task) => new Task(task));
+    return GeneralModel.parseOutput(tasks);
   }
 
-  static async getTask(id: number) {
-    const data = await db.query<T_OUT["TASKS"]>(
-      `SELECT * FROM ${TNAMES.TASKS} WHERE t_id = $1`,
-      [id],
+  static async getByRels(data: Partial<Rels>, limit?: number | null) {
+    const output = await GeneralModel.getJoin<Output, Rels>(
+      this.joinQuery,
+      "b",
+      { conditions: data, limit },
     );
-    if (!data.rows.length || !data.rows[0])
-      throw new Error(`Task ID ${String(id)} Not Found`);
-    return new Task(data.rows[0]);
-  }
-
-  static async getAllTasks() {
-    const data = await db.query<T_OUT["TASKS"]>(
-      `SELECT * FROM ${TNAMES.TASKS};`,
-    );
-    return data.rows.map((task) => new Task(task));
+    const tasks = output.map((task) => new FullTask(task, task));
+    return GeneralModel.parseOutput(tasks, "Task Not Found");
   }
 }

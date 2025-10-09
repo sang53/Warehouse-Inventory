@@ -1,48 +1,174 @@
-import { T_IN, T_OUT } from "../config/tableTypes.ts";
-import db from "../config/pool.ts";
 import { TNAMES } from "../config/tableSchema.ts";
-import parseOutput from "../utils/parseOutput.ts";
-import type { PoolClient } from "pg";
+import { OrderType, T_IN, T_OUT } from "../config/tableTypes.ts";
+import generalModel from "./generalModel.ts";
+import GeneralModel from "./generalModel.ts";
+import Product from "./productsModel.ts";
+
+const TableName = "ORDERS" as const;
+const TasksTable = "O_T" as const;
+const ProductsTable = "O_P" as const;
+
+type Output = T_OUT[typeof TableName] & T_OUT[typeof TasksTable];
 
 export default class Order {
-  p_id: number;
-  stock: number;
   o_id: number;
-  complete: string | null;
-  t_id: number | null;
+  completed: Date | null;
+  o_type: OrderType;
+  placed: Date;
+  t_id: number;
 
-  constructor(orderData: T_OUT["ORDERS"]) {
-    this.o_id = orderData.o_id;
-    this.p_id = orderData.p_id;
-    this.stock = orderData.stock;
-    this.complete = orderData.complete;
-    this.t_id = orderData.t_id;
+  static table = TableName;
+  static TasksTable = TasksTable;
+
+  static Query = `${TNAMES[Order.table]} AS a
+    LEFT JOIN ${TNAMES[Order.TasksTable]} AS b
+    ON a.o_id = b.o_id`;
+
+  constructor(data: Output) {
+    this.o_id = data.o_id;
+    this.completed = data.completed;
+    this.o_type = data.o_type;
+    this.placed = data.placed;
+    this.t_id = data.t_id;
   }
 
-  static async get(id: number) {
-    const data = await db.query<T_OUT["ORDERS"]>(
-      `SELECT * FROM ${TNAMES.ORDERS} WHERE o_id = $1;`,
-      [id],
-    );
-    if (!data.rows.length || !data.rows[0])
-      throw new Error(`Order ID ${String(id)} Not Found`);
-    return new Order(data.rows[0]);
+  static async get(data: Partial<Output>, limit?: number | null) {
+    const output = await GeneralModel.getJoin<Output>(Order.Query, "a", {
+      conditions: data,
+      limit,
+    });
+    const orders = output.map((order) => new Order(order));
+    return GeneralModel.parseOutput(orders, `Order Not Found`);
   }
 
   static async getAll() {
-    const data = await db.query<T_OUT["ORDERS"]>(
-      `SELECT * FROM ${TNAMES.ORDERS};`,
-    );
-    return data.rows.map((order) => new Order(order));
+    const output = await GeneralModel.getJoin<Output>(Order.Query, "a", {
+      limit: 50,
+      desc: true,
+      order: ["placed"],
+    });
+    return output.map((order) => new Order(order));
   }
 
-  static async create(order: T_IN["ORDERS"], client?: PoolClient) {
-    const connection = client || db;
-    const data = await connection.query<T_OUT["ORDERS"]>(
-      `INSERT INTO ${TNAMES.ORDERS} (p_id, stock) VALUES ($1, $2) RETURNING *;`,
-      [order.p_id, order.stock],
+  static async getByTask(t_id: number) {
+    const query = `SELECT b.* FROM ${TNAMES["O_T"]} a
+    JOIN ${TNAMES["ORDERS"]} b
+    ON a.o_id = b.o_id`;
+    const output = await generalModel.getJoin<T_OUT["O_T"], T_OUT["ORDERS"]>(
+      query,
+      "a",
+      { conditions: { t_id } },
     );
-    const parsedOutput = parseOutput(data.rows, `Order Cannot Be Created`);
-    return new Order(parsedOutput[0]);
+    const orders = GeneralModel.parseOutput(
+      output,
+      `Task ${String(t_id)} not associated with Order`,
+    );
+
+    return new Order(orders[0]);
+  }
+
+  async addTask(t_id: number) {
+    const output = await GeneralModel.create(Order.TasksTable, {
+      o_id: this.o_id,
+      t_id,
+    });
+    this.t_id = output.t_id;
+    return this;
+  }
+
+  async complete() {
+    this.completed = await generalModel.timestamp(
+      "ORDERS",
+      "completed",
+      { o_id: this.o_id },
+      true,
+    );
+    return this;
+  }
+}
+
+export class ProductOrder extends Order {
+  static ProductsTable = ProductsTable;
+  products: Map<number, number>;
+
+  constructor(data: Output, products: number[], stock: number[]) {
+    super(data);
+    this.products = this.#getProductMap(products, stock);
+  }
+
+  static async getProducts(order: Order) {
+    const products = await this.#queryProducts(order.o_id);
+
+    return new ProductOrder(
+      order,
+      products.map(({ p_id }) => p_id),
+      products.map(({ stock }) => stock),
+    );
+  }
+
+  static async create(
+    { o_type }: T_IN[typeof Order.table],
+    t_id: number,
+    products: number[],
+    stock: number[],
+  ) {
+    await this.#validateProducts(products);
+    const output = await GeneralModel.create(Order.table, { o_type });
+    const order = new ProductOrder({ ...output, t_id }, products, stock);
+    await Promise.allSettled([
+      ...products.map((p_id, idx) => {
+        if (stock[idx])
+          return GeneralModel.create(ProductOrder.ProductsTable, {
+            o_id: order.o_id,
+            p_id,
+            stock: stock[idx],
+          });
+        else return null;
+      }),
+      order.addTask(t_id),
+    ]);
+    return order;
+  }
+
+  static async getFull(data: Partial<T_OUT["ORDERS"]>) {
+    const order = (await this.get(data))[0];
+    const products = await this.#queryProducts(order.o_id);
+
+    return new ProductOrder(
+      order,
+      products.map(({ p_id }) => p_id),
+      products.map(({ stock }) => stock),
+    );
+  }
+
+  static async #validateProducts(products: number[]) {
+    // make sure all p_ids are in DB
+    const DBproducts = await generalModel.getArray(
+      Product.table,
+      "p_id",
+      products,
+      {
+        limit: null,
+      },
+    );
+    const ValidProducts = new Set(DBproducts.map((product) => product.p_id));
+    const invalidProducts = products.filter((p_id) => !ValidProducts.has(p_id));
+    if (invalidProducts.length)
+      throw new Error(`Invalid Product ID/s: ${String(invalidProducts)}`);
+  }
+
+  static async #queryProducts(o_id: number) {
+    return await generalModel.get(ProductOrder.ProductsTable, {
+      conditions: { o_id },
+    });
+  }
+
+  #getProductMap(products: number[], stock: number[]) {
+    return new Map(
+      products.map((p_id, idx) => {
+        if (stock[idx]) return [p_id, stock[idx]];
+        else return [NaN, NaN];
+      }),
+    );
   }
 }
