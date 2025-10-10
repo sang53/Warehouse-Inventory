@@ -7,7 +7,6 @@ interface PalletLocals {
 }
 
 export function getPalletLocals({ pallet, l_name }: PalletLocals) {
-  // TODO: include location
   return {
     view: "pallet",
     viewData: {

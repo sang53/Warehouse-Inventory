@@ -9,7 +9,7 @@ import { FullTask } from "../models/tasksModel.ts";
 export const loginGet = [
   (req: Request, res: Response) => {
     if (req.isAuthenticated()) throw new Error("Already Logged In");
-    res.render("login");
+    res.render("login", { errors: [] });
   },
 ];
 

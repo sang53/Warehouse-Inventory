@@ -3,7 +3,6 @@ import { Strategy as LocalStrategy } from "passport-local";
 import User from "../models/usersModel.ts";
 import argon2 from "argon2";
 
-// TODO: see how app changes w/ & w/o returns
 passport.use(
   new LocalStrategy((username, password, done) => {
     void (async () => {
@@ -16,10 +15,8 @@ passport.use(
           return;
         }
         done(null, user);
-        return;
       } catch (error) {
         done(error as Error);
-        return;
       }
     })();
   }),
@@ -34,10 +31,8 @@ passport.deserializeUser((user: number, done) => {
     try {
       const userObj = (await User.get({ u_id: user }))[0];
       done(null, userObj);
-      return;
     } catch (error) {
       done(error as Error);
-      return;
     }
   })();
 });

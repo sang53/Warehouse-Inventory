@@ -5,13 +5,10 @@ interface DisplayLocals {
   tableData: Partial<T_OUT[keyof T_OUT]>[];
 }
 
-export default function ({ title, tableData }: DisplayLocals) {
+export default function (tables: DisplayLocals[]) {
   return {
     view: "display",
-    viewData: {
-      title,
-      tableData,
-    },
+    viewData: tables,
   };
 }
 

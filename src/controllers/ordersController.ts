@@ -14,10 +14,21 @@ import getOrderLocals from "../utils/getLocals/getOrderLocals.ts";
 
 export const ordersGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
-    res.locals = getDisplayLocals({
-      title: "All Orders",
-      tableData: await Order.getAll(),
-    });
+    const [incoming, outgoing] = await Promise.all([
+      Order.getByComplete(true, "IN"),
+      Order.getByComplete(true, "OUT"),
+    ]);
+
+    res.locals = getDisplayLocals([
+      {
+        title: "Completed Incoming Orders",
+        tableData: incoming,
+      },
+      {
+        title: "Completed Outgoing Orders",
+        tableData: outgoing,
+      },
+    ]);
     next();
   },
 ];

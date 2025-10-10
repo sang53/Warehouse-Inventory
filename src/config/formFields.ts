@@ -30,14 +30,6 @@ export default {
       ...NAME_FIELD,
     },
   ],
-  PALLETS: [
-    {
-      text: "Product ID",
-      name: "p_id",
-      ...ID_FIELD,
-    },
-    STOCK_FIELD,
-  ],
   USERS: [
     {
       text: "Name",

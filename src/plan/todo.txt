@@ -1,3 +1,8 @@
 Add new View = Shortages: product, storage, outgoing, incoming, difference
-Go over form fields to reflect changes
-Change display to include links to individual routes
+Change multiple awaits to 1 Promise.all
+Redo orders form to provide products[] and stocks[]
+Remove unnecessary views => display view
+Add comments
+Change DB scripts => move associated .ts files into 1
+Make DB scripts to add initial data to database
+Add styling

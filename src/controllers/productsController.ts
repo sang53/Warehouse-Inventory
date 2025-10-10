@@ -13,10 +13,12 @@ import { ensureRole } from "../middlewares/authenticate.ts";
 
 export const productsGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
-    res.locals = getDisplayLocals({
-      title: "Products",
-      tableData: await Product.getAll(),
-    });
+    res.locals = getDisplayLocals([
+      {
+        title: "Products",
+        tableData: await Product.getAll(),
+      },
+    ]);
     next();
   },
 ];
@@ -50,10 +52,12 @@ export const productsIDGet = [
     const { id } = matchedData<{ id: number }>(req);
     const product = (await Product.get({ p_id: id }))[0];
 
-    res.locals = getDisplayLocals({
-      title: `Product ${String(product.p_id)}`,
-      tableData: [product],
-    });
+    res.locals = getDisplayLocals([
+      {
+        title: `Product ${String(product.p_id)}`,
+        tableData: [product],
+      },
+    ]);
     next();
   },
 ];

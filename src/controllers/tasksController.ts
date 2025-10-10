@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import Task, { FullTask } from "../models/tasksModel.ts";
+import { FullTask } from "../models/tasksModel.ts";
 import { checkValidation, validateInt } from "../middlewares/validate.ts";
 import { matchedData } from "express-validator";
 import getDisplayLocals from "../utils/getLocals/getDisplayLocals.ts";
@@ -13,12 +13,21 @@ import { ProductOrder } from "../models/ordersModel.ts";
 
 export const tasksGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
-    const tasks = await Task.getAll();
+    const [incomplete, complete] = await Promise.all([
+      FullTask.getByComplete(false),
+      FullTask.getByComplete(true),
+    ]);
 
-    res.locals = getDisplayLocals({
-      title: "All Tasks",
-      tableData: tasks,
-    });
+    res.locals = getDisplayLocals([
+      {
+        title: "Incomplete Tasks",
+        tableData: incomplete,
+      },
+      {
+        title: "Completed Tasks",
+        tableData: complete,
+      },
+    ]);
     next();
   },
 ];

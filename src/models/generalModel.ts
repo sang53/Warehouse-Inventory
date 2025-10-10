@@ -165,7 +165,7 @@ export default (function () {
   ) {
     if (!order) return "";
     if (tablePrefix) order = order.map((column) => tablePrefix + column);
-    return ` ORDER BY ${order.join(", ")}${desc ? "DESC" : ""}`;
+    return ` ORDER BY ${order.join(", ")}${desc ? " DESC" : ""}`;
   }
 
   function getLimit(limit: number | null) {
