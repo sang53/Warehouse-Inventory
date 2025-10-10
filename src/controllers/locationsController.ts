@@ -14,16 +14,18 @@ export const locationsGet = [
   },
 ];
 
+// TODO: Maybe add current pallet/task info
+// add info whether currently reserved by task
 export const locationsIDGet = [
   ...validateInt("id"),
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
-    const location = await Location.get(id);
+    const location = await Location.get({ l_id: id });
 
     res.locals = getDisplayLocals({
       title: `Location ${String(id)}`,
-      tableData: [location],
+      tableData: location,
     });
     next();
   },

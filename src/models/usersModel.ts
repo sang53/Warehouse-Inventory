@@ -47,7 +47,7 @@ export default class User {
   }
 }
 
-class VerifyUser extends User {
+export class VerifyUser extends User {
   username: string;
   password: string;
 

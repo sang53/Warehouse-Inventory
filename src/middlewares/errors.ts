@@ -22,12 +22,12 @@ export function parseError(
 }
 
 export function renderErrorPage(
-  error: string[],
+  errors: string[],
   _req: Request,
   res: Response,
   _next: NextFunction,
 ) {
   res.render("errorPage", {
-    error,
+    errors,
   });
 }

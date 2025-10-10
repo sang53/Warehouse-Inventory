@@ -124,7 +124,7 @@ export class FullTask extends Task {
       "a",
       { conditions: data, order, limit, desc },
     );
-    const tasks = output.map((task) => new Task(task));
+    const tasks = output.map((task) => new FullTask(task, task));
     return GeneralModel.parseOutput(tasks);
   }
 
@@ -136,5 +136,13 @@ export class FullTask extends Task {
     );
     const tasks = output.map((task) => new FullTask(task, task));
     return GeneralModel.parseOutput(tasks, "Task Not Found");
+  }
+
+  static async getRels(task: Task) {
+    const output = await GeneralModel.get(FullTask.RelsTable, {
+      conditions: { t_id: task.t_id },
+    });
+    const rels = GeneralModel.parseOutput(output);
+    return new FullTask(task, rels[0]);
   }
 }

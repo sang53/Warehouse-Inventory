@@ -45,7 +45,7 @@ export const productsIDGet = [
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
-    const product = await Product.get(id);
+    const product = (await Product.get({ p_id: id }))[0];
 
     res.locals = getDisplayLocals({
       title: `Product ${String(product.p_id)}`,

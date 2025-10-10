@@ -1,10 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
-import Pallet from "../models/palletsModel.ts";
+import Pallet, { ProductPallet } from "../models/palletsModel.ts";
 import { matchedData } from "express-validator";
 import { checkValidation, validateInt } from "../middlewares/validate.ts";
-import { T_OUT } from "../config/tableTypes.ts";
 import getDisplayLocals from "../utils/getLocals/getDisplayLocals.ts";
 import getFormLocals from "../utils/getLocals/getFormLocals.ts";
+import { getPalletLocals } from "../utils/getLocals/getPalletLocals.ts";
+import Location from "../models/locationsModel.ts";
 
 export const palletsGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
@@ -28,12 +29,10 @@ export const palletsIDGet = [
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
-    const pallet = await Pallet.get(id);
+    const pallet = await ProductPallet.get({ pa_id: id });
+    const { l_name } = (await Location.get({ pa_id: id }))[0];
 
-    res.locals = getDisplayLocals({
-      title: `Pallet ${String(id)}`,
-      tableData: [pallet],
-    });
+    res.locals = getPalletLocals({ pallet, l_name });
     next();
   },
 ];
@@ -49,18 +48,5 @@ export const palletsIDEditGet = [
       field: "PALLETS",
     });
     next();
-  },
-];
-
-export const palletsIDEditPost = [
-  ...validateInt("pa_id"),
-  ...validateInt("p_id"),
-  ...validateInt("stock"),
-  checkValidation,
-  async (req: Request, res: Response) => {
-    const { pa_id, p_id, stock } = matchedData<T_OUT["PA_P_PA"]>(req);
-    const pallet = await Pallet.get(pa_id);
-    await pallet.setStock(p_id, stock);
-    res.redirect(`/pallets/${String(pa_id)}`);
   },
 ];
