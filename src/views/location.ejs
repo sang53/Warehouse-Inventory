@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Warehouse Inventory</title>
+  </head>
+  <body>
+    <%- include("partials/header.ejs") %>
+    <div class="main">
+      <h1>Overall Stats:</h1>
+      <div class="stats">
+        <h1>Location <%= location.l_id %></h1>
+        <%- include("partials/table.ejs", { tableData: [location] }) %>
+        <h2>Reserved for task: <%= t_id %></h2>
+      </div>
+    </div>
+  </body>
+</html>

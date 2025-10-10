@@ -3,6 +3,8 @@ import Location from "../models/locationsModel.ts";
 import { checkValidation, validateInt } from "../middlewares/validate.ts";
 import { matchedData } from "express-validator";
 import getDisplayLocals from "../utils/getLocals/getDisplayLocals.ts";
+import getLocationLocals from "../utils/getLocals/getLocationLocals.ts";
+import { FullTask } from "../models/tasksModel.ts";
 
 export const locationsGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
@@ -21,12 +23,10 @@ export const locationsIDGet = [
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
-    const location = await Location.get({ l_id: id });
+    const location = (await Location.get({ l_id: id }))[0];
+    const { t_id } = (await FullTask.getByRels({ l_id: id }))[0];
 
-    res.locals = getDisplayLocals({
-      title: `Location ${String(id)}`,
-      tableData: location,
-    });
+    res.locals = getLocationLocals({ location, t_id });
     next();
   },
 ];
