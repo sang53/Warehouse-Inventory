@@ -145,4 +145,8 @@ export class FullTask extends Task {
     const rels = GeneralModel.parseOutput(output);
     return new FullTask(task, rels[0]);
   }
+
+  static async cancelTask(u_id: number) {
+    await GeneralModel.update(this.RelsTable, { u_id: null }, { u_id });
+  }
 }

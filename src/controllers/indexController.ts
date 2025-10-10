@@ -18,8 +18,8 @@ export const indexGet = [
 ];
 
 export const currentGet = [
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    const user = req.user;
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = (req as AuthenticatedRequest).user;
 
     // Prevent admins from being assigned tasks
     if (user.u_role === "admin") {

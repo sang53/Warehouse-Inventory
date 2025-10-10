@@ -9,6 +9,7 @@ import {
 import { T_IN } from "../config/tableTypes.ts";
 import getDisplayLocals from "../utils/getLocals/getDisplayLocals.ts";
 import getFormLocals from "../utils/getLocals/getFormLocals.ts";
+import { ensureRole } from "../middlewares/authenticate.ts";
 
 export const productsGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
@@ -21,6 +22,7 @@ export const productsGet = [
 ];
 
 export const productsNewGet = [
+  ensureRole(),
   (_req: Request, res: Response, next: NextFunction) => {
     res.locals = getFormLocals({
       title: "New Product",
@@ -32,6 +34,7 @@ export const productsNewGet = [
 ];
 
 export const productsNewPost = [
+  ensureRole(),
   validateAlphaNum("p_name"),
   checkValidation,
   async (req: Request, res: Response) => {

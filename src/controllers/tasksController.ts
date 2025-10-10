@@ -41,15 +41,16 @@ export const tasksIDGet = [
 export const tasksIDPost = [
   ...validateInt("id"),
   checkValidation,
-  async (req: AuthenticatedRequest, res: Response) => {
+  async (req: Request, res: Response) => {
     const { id } = matchedData<{ id: number }>(req);
     const task = (await FullTask.getFull({ t_id: id }))[0];
+    const user = (req as AuthenticatedRequest).user;
 
     // make sure task is valid
     if (task.completed) throw new Error(`Task ${String(id)} Already Completed`);
 
     // make sure admin or assigned user
-    if (req.user.u_role !== "admin" && req.user.u_id !== task.u_id)
+    if (user.u_role !== "admin" && user.u_id !== task.u_id)
       throw new Error("Permission Denied");
 
     await completeTask(task);

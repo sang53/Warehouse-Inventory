@@ -14,7 +14,6 @@ import { getCurrentTask } from "../services/tasks.ts";
 import { ensureRole } from "../middlewares/authenticate.ts";
 
 export const usersGet = [
-  ensureRole(),
   async (_req: Request, res: Response, next: NextFunction) => {
     const users = await User.getAll();
     res.locals = getDisplayLocals({
@@ -26,7 +25,6 @@ export const usersGet = [
 ];
 
 export const usersIDGet = [
-  ensureRole(),
   ...validateInt("id"),
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {

@@ -1,6 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
 import passport from "passport";
-import { AuthenticatedRequest } from "../middlewares/authenticate.ts";
+import {
+  AuthenticatedRequest,
+  ensureAuthenticated,
+} from "../middlewares/authenticate.ts";
+import { FullTask } from "../models/tasksModel.ts";
 
 export const loginGet = [
   (req: Request, res: Response) => {
@@ -10,9 +14,9 @@ export const loginGet = [
 ];
 
 export const loginPost = [
-  // force log out if currently logged in
+  // only allow if logged in
   (req: Request, _res: Response, next: NextFunction) => {
-    if (req.isAuthenticated()) req.logOut(next);
+    if (req.isAuthenticated()) throw new Error("Already Logged In");
     else next();
   },
 
@@ -32,7 +36,10 @@ export const loginPost = [
 ];
 
 export const logoutGet = [
-  (req: AuthenticatedRequest, res: Response) => {
+  ensureAuthenticated,
+  async (req: Request, res: Response) => {
+    // unassign task from user if assigned
+    await FullTask.cancelTask((req as AuthenticatedRequest).user.u_id);
     req.logOut(() => {
       res.redirect("/login");
     });
