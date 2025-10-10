@@ -36,8 +36,7 @@ export async function getCurrentTask(user: User, start: boolean = true) {
   const task = await Task.getNewByTypes(USER_TASK_MAP[user.u_role]);
   if (!task) return null;
   // set up and start task
-  await startTask(task, user);
-  return task;
+  return await startTask(task, user);
 }
 
 async function startTask(task: Task, user: User) {
@@ -48,8 +47,8 @@ async function startTask(task: Task, user: User) {
     taskRels.l_id = await Location.getEmpty(LTYPEMAP[task.t_type]);
 
   // save data & start timestamp
-  await task.updateRels(taskRels);
-  await task.setStart();
+  const fullTask = await task.updateRels(taskRels);
+  return await fullTask.setStart();
 }
 
 export async function completeTask(task: FullTask) {

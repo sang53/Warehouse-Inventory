@@ -8,16 +8,12 @@
   <body>
     <%- include("partials/header.ejs") %>
     <div class="main">
-      <h1>Overall Stats:</h1>
-      <div class="stats">
-        <p>Total Products: <%= products %></p>
-        <p>Total Locations: <%= locations %></p>
-        <p>Total Pallets: <%= pallets %></p>
-        <p>Total Stock: <%= stock %></p>
-      </div>
-      <form action="/" method="post">
-        <button type="submit">RESET</button>
-      </div>
+      <h1>Current Tasks</h1>
+      <%- include("partials/table.ejs", { tableData: tasks }) %>
+      <h1>Current Incoming Orders</h1>
+      <%- include("partials/table.ejs", { tableData: inOrders }) %>
+      <h1>Current Outgoing Orders</h1>
+      <%- include("partials/table.ejs", { tableData: outOrders }) %>
     </div>
   </body>
 </html>

@@ -154,8 +154,8 @@ export default (function () {
     return data as [T, ...T[]];
   }
 
-  function getValues(data: object | undefined) {
-    return data ? Object.values(data) : undefined;
+  function getValues(data: object | undefined): unknown[] {
+    return data ? Object.values(data) : [];
   }
 
   function getOrder(

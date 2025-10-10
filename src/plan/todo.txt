@@ -1,3 +1,4 @@
-Update Index & Locations View
+Update Locations View
+Add new View = Shortages: product, storage, outgoing, incoming, difference
 Go over form fields to reflect changes
 Change display to include links to individual routes

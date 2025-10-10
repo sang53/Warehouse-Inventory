@@ -1,6 +1,7 @@
 import { T_IN, T_OUT, TaskType } from "../config/tableTypes.ts";
 import { TNAMES } from "../config/tableSchema.ts";
 import GeneralModel from "./generalModel.ts";
+import db from "../config/pool.ts";
 
 const TableName = "TASKS" as const;
 const RelsTable = "TASKREL" as const;
@@ -12,9 +13,9 @@ type Rels = T_OUT[typeof RelsTable];
 export default class Task {
   t_id: number;
   t_type: TaskType;
-  placed: Date;
-  started: Date | null;
-  completed: Date | null;
+  placed: string;
+  started: string | null;
+  completed: string | null;
 
   static table = TableName;
 
@@ -84,8 +85,8 @@ export default class Task {
 
 export class FullTask extends Task {
   static RelsTable = RelsTable;
-  static joinQuery = `${TNAMES[Task.table]} AS a
-    LEFT JOIN ${TNAMES[FullTask.RelsTable]} AS b
+  static joinQuery = `${TNAMES[Task.table]} a
+    LEFT JOIN ${TNAMES[FullTask.RelsTable]} b
     ON a.t_id = b.t_id`;
 
   pa_id: number;
@@ -136,6 +137,18 @@ export class FullTask extends Task {
     );
     const tasks = output.map((task) => new FullTask(task, task));
     return GeneralModel.parseOutput(tasks, "Task Not Found");
+  }
+
+  static async getByComplete(complete: boolean) {
+    const query = `SELECT * FROM 
+    ${TNAMES[Task.table]} a
+    LEFT JOIN ${TNAMES[FullTask.RelsTable]} b
+    ON a.t_id = b.t_id
+    WHERE a.completed IS${complete ? " NOT" : ""} NULL
+    ORDER BY a.placed
+    LIMIT 20;`;
+    const output = await db.query<Output & Rels>(query);
+    return output.rows.map((task) => new FullTask(task, task));
   }
 
   static async getRels(task: Task) {

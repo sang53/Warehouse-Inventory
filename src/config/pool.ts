@@ -1,7 +1,6 @@
 import { Pool, types } from "pg";
 import "dotenv/config";
 
-types.setTypeParser(16, (val) => val === "t");
 types.setTypeParser(23, (val) => Number(val));
 
 export default new Pool({

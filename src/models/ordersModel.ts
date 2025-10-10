@@ -3,6 +3,7 @@ import { OrderType, T_IN, T_OUT } from "../config/tableTypes.ts";
 import generalModel from "./generalModel.ts";
 import GeneralModel from "./generalModel.ts";
 import Product from "./productsModel.ts";
+import db from "../config/pool.ts";
 
 const TableName = "ORDERS" as const;
 const TasksTable = "O_T" as const;
@@ -12,9 +13,9 @@ type Output = T_OUT[typeof TableName] & T_OUT[typeof TasksTable];
 
 export default class Order {
   o_id: number;
-  completed: Date | null;
+  completed: string | null;
   o_type: OrderType;
-  placed: Date;
+  placed: string;
   t_id: number;
 
   static table = TableName;
@@ -65,6 +66,19 @@ export default class Order {
     );
 
     return new Order(orders[0]);
+  }
+
+  static async getByComplete(complete: boolean, o_type?: OrderType) {
+    const query = `SELECT * FROM ${TNAMES["O_T"]} a
+    JOIN ${TNAMES["ORDERS"]} b
+    ON a.o_id = b.o_id
+    WHERE b.completed IS ${complete ? "NOT" : ""} NULL
+    ${o_type ? "AND b.o_type = $1" : ""}
+    ORDER BY b.placed
+    LIMIT 20;`;
+
+    const output = await db.query<Output>(query, o_type ? [o_type] : []);
+    return output.rows.map((order) => new Order(order));
   }
 
   async addTask(t_id: number) {

@@ -87,14 +87,14 @@ export interface T_OUT extends T_IN {
   };
   ORDERS: T_IN["ORDERS"] & {
     o_id: number;
-    completed: Date | null;
-    placed: Date;
+    completed: string | null;
+    placed: string;
   };
   TASKS: T_IN["TASKS"] & {
     t_id: number;
-    placed: Date;
-    started: Date | null;
-    completed: Date | null;
+    placed: string;
+    started: string | null;
+    completed: string | null;
   };
   TASKREL: T_IN["TASKREL"] & {
     l_id: number | null;
