@@ -7,10 +7,10 @@ import {
   validateOType,
 } from "../middlewares/validate.ts";
 import { matchedData } from "express-validator";
-import getDisplayLocals from "../utils/getLocals/getDisplayLocals.ts";
-import getFormLocals from "../utils/getLocals/getFormLocals.ts";
+import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
+import getFormLocals from "../getLocals/getFormLocals.ts";
 import { createOrder } from "../services/orders.ts";
-import getOrderLocals from "../utils/getLocals/getOrderLocals.ts";
+import getOrderLocals from "../getLocals/getOrderLocals.ts";
 
 export const ordersGet = [
   async (_req: Request, res: Response, next: NextFunction) => {

@@ -1,8 +1,8 @@
-import Location from "../../models/locationsModel.ts";
-import { FullTask } from "../../models/tasksModel.ts";
-import User from "../../models/usersModel.ts";
-import extractKeys from "../extractKeys.ts";
-import mapToView from "../mapToView.ts";
+import Location from "../models/locationsModel.ts";
+import { FullTask } from "../models/tasksModel.ts";
+import User from "../models/usersModel.ts";
+import extractKeys from "../utils/extractKeys.ts";
+import mapToView from "../utils/mapToView.ts";
 
 interface CurrentLocals {
   user: User;

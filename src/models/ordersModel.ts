@@ -54,18 +54,18 @@ export default class Order {
   static async getByTask(t_id: number) {
     const query = `SELECT b.* FROM ${TNAMES["O_T"]} a
     JOIN ${TNAMES["ORDERS"]} b
-    ON a.o_id = b.o_id`;
+    ON a.o_id = b.o_id;`;
     const output = await generalModel.getJoin<T_OUT["O_T"], T_OUT["ORDERS"]>(
       query,
       "a",
       { conditions: { t_id } },
     );
-    const orders = GeneralModel.parseOutput(
+    const [order] = GeneralModel.parseOutput(
       output,
       `Task ${String(t_id)} not associated with Order`,
     );
 
-    return new Order(orders[0]);
+    return new Order(order);
   }
 
   static async getByComplete(complete: boolean, o_type?: OrderType) {
@@ -144,8 +144,8 @@ export class ProductOrder extends Order {
     return order;
   }
 
-  static async getFull(data: Partial<T_OUT["ORDERS"]>) {
-    const order = (await this.get(data))[0];
+  static async getFull(data: Partial<Output>) {
+    const [order] = await this.get(data);
     const products = await this.#queryProducts(order.o_id);
 
     return new ProductOrder(

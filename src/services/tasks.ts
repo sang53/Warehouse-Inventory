@@ -26,8 +26,8 @@ const END_ORDER_MAP: Record<OrderType, TaskType> = {
 export async function getCurrentTask(user: User, start: boolean = true) {
   // return if task already assigned || not starting new task
   try {
-    const tasks = await FullTask.getByRels({ u_id: user.u_id });
-    return tasks[0];
+    const [task] = await FullTask.getByRels({ u_id: user.u_id });
+    return task;
   } catch {
     if (!start) return null;
   }

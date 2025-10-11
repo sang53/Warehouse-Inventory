@@ -2,8 +2,8 @@ import type { NextFunction, Request, Response } from "express";
 import Pallet, { ProductPallet } from "../models/palletsModel.ts";
 import { matchedData } from "express-validator";
 import { checkValidation, validateInt } from "../middlewares/validate.ts";
-import getDisplayLocals from "../utils/getLocals/getDisplayLocals.ts";
-import { getPalletLocals } from "../utils/getLocals/getPalletLocals.ts";
+import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
+import { getPalletLocals } from "../getLocals/getPalletLocals.ts";
 import Location from "../models/locationsModel.ts";
 
 export const palletsGet = [
@@ -23,8 +23,11 @@ export const palletsIDGet = [
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
-    const pallet = await ProductPallet.get({ pa_id: id });
-    const { l_name } = (await Location.get({ pa_id: id }))[0];
+
+    const [pallet, [{ l_name }]] = await Promise.all([
+      ProductPallet.get({ pa_id: id }),
+      Location.get({ pa_id: id }),
+    ]);
 
     res.locals = getPalletLocals({ pallet, l_name });
     next();

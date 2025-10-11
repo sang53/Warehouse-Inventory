@@ -1,6 +1,6 @@
-import { ProductOrder } from "../../models/ordersModel.ts";
-import extractKeys from "../extractKeys.ts";
-import mapToView from "../mapToView.ts";
+import { ProductOrder } from "../models/ordersModel.ts";
+import extractKeys from "../utils/extractKeys.ts";
+import mapToView from "../utils/mapToView.ts";
 
 interface OrderLocals {
   order: ProductOrder;

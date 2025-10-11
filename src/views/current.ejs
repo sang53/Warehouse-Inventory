@@ -12,7 +12,7 @@
           <h2><%= user.u_role %></h2>
           <h2>ID: <%= user.u_id %></h2>
         </div>
-        <h2>Current Location: <%= l_name || "Get New Pallet" %></h2>
+        <h2>Current Location: <%= l_name %></h2>
         <h1>Current Task</h1>
         <%- include("partials/table.ejs", { tableData: [task] }) %>
         <h1>Products</h1>

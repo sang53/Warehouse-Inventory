@@ -7,8 +7,8 @@ import {
   validateInt,
 } from "../middlewares/validate.ts";
 import { T_IN } from "../config/tableTypes.ts";
-import getDisplayLocals from "../utils/getLocals/getDisplayLocals.ts";
-import getFormLocals from "../utils/getLocals/getFormLocals.ts";
+import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
+import getFormLocals from "../getLocals/getFormLocals.ts";
 import { ensureRole } from "../middlewares/authenticate.ts";
 
 export const productsGet = [
@@ -19,12 +19,12 @@ export const productsGet = [
     ]);
     res.locals = getDisplayLocals([
       {
-        title: "All Products",
-        tableData: id,
-      },
-      {
         title: "Products by Net Stock",
         tableData: net,
+      },
+      {
+        title: "All Products",
+        tableData: id,
       },
     ]);
     next();
@@ -48,7 +48,8 @@ export const productsNewPost = [
   validateAlphaNum("p_name"),
   checkValidation,
   async (req: Request, res: Response) => {
-    const product = await Product.create(matchedData<T_IN["PRODUCTS"]>(req));
+    const { p_name } = matchedData<T_IN["PRODUCTS"]>(req);
+    const product = await Product.create({ p_name });
     res.redirect(`/products/${String(product.p_id)}`);
   },
 ];
@@ -58,7 +59,7 @@ export const productsIDGet = [
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
-    const product = (await Product.get({ p_id: id }))[0];
+    const product = await Product.getStockByProduct(id);
 
     res.locals = getDisplayLocals([
       {

@@ -70,11 +70,11 @@ export default class Location {
       LIMIT 1;`;
 
     const output = await db.query<{ l_id: number }>(query, [l_role]);
-    const location = GeneralModel.parseOutput(
+    const [location] = GeneralModel.parseOutput(
       output.rows,
       `No empty locations of ${l_role} - report to admin`,
     );
-    return location[0].l_id;
+    return location.l_id;
   }
 
   static async movePallet(pa_id: number, l_id?: number | null) {

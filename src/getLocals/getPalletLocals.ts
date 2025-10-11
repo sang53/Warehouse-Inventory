@@ -1,5 +1,5 @@
-import { ProductPallet } from "../../models/palletsModel.ts";
-import mapToView from "../mapToView.ts";
+import { ProductPallet } from "../models/palletsModel.ts";
+import mapToView from "../utils/mapToView.ts";
 
 interface PalletLocals {
   pallet: ProductPallet;

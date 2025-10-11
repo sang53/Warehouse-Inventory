@@ -23,7 +23,6 @@ export default class Pallet {
 
   static async getAll() {
     const output = await GeneralModel.get(Pallet.PalletTable, {
-      limit: 50,
       desc: true,
       order: ["pa_id"],
     });
@@ -76,8 +75,7 @@ export class ProductPallet extends Pallet {
     const query = `
     UPDATE p_pa
     SET stock = stock - $3
-    WHERE p_id = $1 AND pa_id = $2
-  `;
+    WHERE p_id = $1 AND pa_id = $2;`;
 
     await Promise.allSettled(
       data.map(({ p_id, pa_id, stock }) =>

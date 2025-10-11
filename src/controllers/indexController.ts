@@ -1,17 +1,19 @@
 import type { Response, Request, NextFunction } from "express";
 import { getCurrentTask } from "../services/tasks.ts";
-import getCurrentLocals from "../utils/getLocals/getCurrentLocals.ts";
+import getCurrentLocals from "../getLocals/getCurrentLocals.ts";
 import { AuthenticatedRequest } from "../middlewares/authenticate.ts";
 import Order, { ProductOrder } from "../models/ordersModel.ts";
 import Location from "../models/locationsModel.ts";
-import getIndexLocals from "../utils/getLocals/getIndexLocals.ts";
+import getIndexLocals from "../getLocals/getIndexLocals.ts";
 import { FullTask } from "../models/tasksModel.ts";
 
 export const indexGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
-    const inOrders = await Order.getByComplete(false, "IN");
-    const outOrders = await Order.getByComplete(false, "OUT");
-    const tasks = await FullTask.getByComplete(false);
+    const [inOrders, outOrders, tasks] = await Promise.all([
+      await Order.getByComplete(false, "IN"),
+      await Order.getByComplete(false, "OUT"),
+      await FullTask.getByComplete(false),
+    ]);
 
     res.locals = getIndexLocals({
       inOrders,
@@ -38,11 +40,17 @@ export const currentGet = [
       throw new Error("No available tasks - report to team leader");
 
     // get current location of pallet
-    const { l_name } = (await Location.get({ pa_id: task.pa_id }))[0];
+    let l_name;
+    try {
+      const [location] = await Location.get({ pa_id: task.pa_id });
+      l_name = location.l_name;
+    } catch {
+      // task pallet is not in location (arrival or pick)
+      l_name = "New Pallet";
+    }
 
     // get product information of order
-    const order = await ProductOrder.getByTask(task.t_id);
-    const fullOrder = await ProductOrder.getProducts(order);
+    const fullOrder = await ProductOrder.getFull({ t_id: task.t_id });
 
     res.locals = getCurrentLocals({
       l_name,

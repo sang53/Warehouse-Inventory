@@ -42,8 +42,8 @@ export default class User {
       conditions: { username },
       limit: 1,
     });
-    const parsedOutput = GeneralModel.parseOutput(output, "User Not Found");
-    return new VerifyUser(parsedOutput[0]);
+    const [user] = GeneralModel.parseOutput(output, "User Not Found");
+    return new VerifyUser(user);
   }
 }
 

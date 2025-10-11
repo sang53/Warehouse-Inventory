@@ -42,12 +42,12 @@ export default class Task {
   }
 
   static async getNewByTypes(types: TaskType[]) {
-    const output = await GeneralModel.getArray(this.table, "t_type", types, {
+    const [task] = await GeneralModel.getArray(this.table, "t_type", types, {
       order: ["placed"],
       conditions: { started: null },
     });
-    if (!output[0]) return null;
-    return new Task(output[0]);
+    if (!task) return null;
+    return new Task(task);
   }
 
   async setStart(value: boolean = true) {
@@ -76,10 +76,10 @@ export default class Task {
   }
 
   async updateRels(data: Partial<Rels>) {
-    const output = await GeneralModel.update(FullTask.RelsTable, data, {
+    const [rels] = await GeneralModel.update(FullTask.RelsTable, data, {
       t_id: this.t_id,
     });
-    return Object.assign(this, output[0]);
+    return Object.assign(this, rels);
   }
 }
 
@@ -155,8 +155,8 @@ export class FullTask extends Task {
     const output = await GeneralModel.get(FullTask.RelsTable, {
       conditions: { t_id: task.t_id },
     });
-    const rels = GeneralModel.parseOutput(output);
-    return new FullTask(task, rels[0]);
+    const [rels] = GeneralModel.parseOutput(output);
+    return new FullTask(task, rels);
   }
 
   static async cancelTask(u_id: number) {

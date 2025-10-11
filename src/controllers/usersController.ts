@@ -7,9 +7,9 @@ import {
 } from "../middlewares/validate.ts";
 import { body, matchedData } from "express-validator";
 import { T_IN, USER_TYPES } from "../config/tableTypes.ts";
-import getDisplayLocals from "../utils/getLocals/getDisplayLocals.ts";
-import getFormLocals from "../utils/getLocals/getFormLocals.ts";
-import getUserLocals from "../utils/getLocals/getUserLocals.ts";
+import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
+import getFormLocals from "../getLocals/getFormLocals.ts";
+import getUserLocals from "../getLocals/getUserLocals.ts";
 import { getCurrentTask } from "../services/tasks.ts";
 import { ensureRole } from "../middlewares/authenticate.ts";
 
@@ -33,10 +33,11 @@ export const usersIDGet = [
     const { id } = matchedData<{ id: number }>(req);
 
     // retrieve user from database
-    const user = (await User.get({ u_id: id }))[0];
+    const [user] = await User.get({ u_id: id });
 
     // retrieve current task
-    const t_id = (await getCurrentTask(user))?.t_id ?? null;
+    const task = await getCurrentTask(user);
+    const t_id = task?.t_id ?? null;
 
     res.locals = getUserLocals({ user, t_id });
     next();

@@ -1,4 +1,4 @@
-import { T_OUT } from "../../config/tableTypes.ts";
+import { T_OUT } from "../config/tableTypes.ts";
 
 interface DisplayLocals {
   title: string;

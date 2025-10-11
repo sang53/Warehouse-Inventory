@@ -1,6 +1,6 @@
-import Order from "../../models/ordersModel.ts";
-import { FullTask } from "../../models/tasksModel.ts";
-import extractKeys from "../extractKeys.ts";
+import Order from "../models/ordersModel.ts";
+import { FullTask } from "../models/tasksModel.ts";
+import extractKeys from "../utils/extractKeys.ts";
 
 interface IndexLocals {
   tasks: FullTask[];

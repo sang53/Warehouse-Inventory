@@ -1,5 +1,5 @@
-import Location from "../../models/locationsModel.ts";
-import extractKeys from "../extractKeys.ts";
+import Location from "../models/locationsModel.ts";
+import extractKeys from "../utils/extractKeys.ts";
 
 interface LocationLocals {
   location: Location;

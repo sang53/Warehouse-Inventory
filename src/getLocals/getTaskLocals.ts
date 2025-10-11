@@ -1,7 +1,7 @@
-import { ProductOrder } from "../../models/ordersModel.ts";
-import { FullTask } from "../../models/tasksModel.ts";
-import extractKeys from "../extractKeys.ts";
-import mapToView from "../mapToView.ts";
+import { ProductOrder } from "../models/ordersModel.ts";
+import { FullTask } from "../models/tasksModel.ts";
+import extractKeys from "../utils/extractKeys.ts";
+import mapToView from "../utils/mapToView.ts";
 
 interface TaskLocals {
   task: FullTask;

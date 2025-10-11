@@ -1,5 +1,5 @@
-import User from "../../models/usersModel.ts";
-import extractKeys from "../extractKeys.ts";
+import User from "../models/usersModel.ts";
+import extractKeys from "../utils/extractKeys.ts";
 
 interface UserLocals {
   user: User;
