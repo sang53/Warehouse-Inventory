@@ -1,6 +1,6 @@
-import Location from "../models/locationsModel.ts";
 import { FullTask } from "../models/tasksModel.ts";
 import User from "../models/usersModel.ts";
+import { getProductInfo } from "../services/stock.ts";
 import extractKeys from "../utils/extractKeys.ts";
 import mapToView from "../utils/mapToView.ts";
 
@@ -25,8 +25,8 @@ export default async function ({
       task: extractKeys(task, ["t_id", "t_type", "pa_id", "l_id", "placed"]),
       products:
         task.t_type === "pick"
-          ? await Location.getByProducts(products)
-          : mapToView(products),
+          ? await getProductInfo(products)
+          : { data: mapToView(products) },
     },
   };
 }

@@ -11,25 +11,18 @@ Functionality:
     - assign arrival products to order
     - create pallet
     - assign products to pallet
-    - find empty location in incoming
     - create task to move pallet to incoming
 1b. Arrival => incoming
   - assign user to task => timestamp start
     - find & assign free incoming location to task
-    - update location to pending
   - complete task => timestamp complete
     - update pallet location
     - create next task (check incoming) => timestamp placed
       - assign new task to order
       - assign pallet to task
 
-NOTES: 
-  have logic to skip arrival => incoming if incoming locations are full => error if no other tasks
-  have a placed timestamp in tasks & sort by placed to complete old tasks first
-
 1c. Check incoming
   - assign user to task => timestamp
-    - get product list of order
   - complete task => timestamp
     - create next task (move to storage) => timestamp
       - assign new task to order
@@ -37,7 +30,6 @@ NOTES:
 1d. Move to storage:
   - assign user to task => timestamp
     - find free storage location
-    - mark location as pending
     - assign location to task
   - complete task => timestamp
     - assign pallet to location
@@ -54,7 +46,6 @@ NOTES:
       - assign pallet to task
     - get items & quantity to pick
     - find & assign free outgoing location
-    - update location to pending
   - complete task => timestamp
     - update location
     - create next task => timestamp
@@ -69,9 +60,9 @@ NOTES:
 
 2d. Export:
   - assign user to task => timestamp
-    - update location to pending
   - complete task => timestamp
     - remove pallet from previous location
+    - delete pallet from db
     - complete order => timestamp
 
 Displays info & tables for each model - ./routes.txt

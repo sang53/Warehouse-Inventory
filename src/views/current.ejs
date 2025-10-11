@@ -4,23 +4,31 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>User <%= user.u_id %>: Task <%= task.t_id %></title>
-    <body>
-      <%- include("partials/header.ejs") %>
-      <div class="main">
-        <div class="user-details">
-          <h2><%= user.u_name %></h1>
-          <h2><%= user.u_role %></h2>
-          <h2>ID: <%= user.u_id %></h2>
-        </div>
-        <h2>Current Location: <%= l_name %></h2>
-        <h1>Current Task</h1>
-        <%- include("partials/table.ejs", { tableData: [task] }) %>
-        <h1>Products</h1>
-        <%- include("partials/table.ejs", { tableData: products }) %>
-      </div>
-      <form action="<%= `/task/${task.t_id}` %>" method="post">
-        <button type="submit">Complete Task</button>
-      </form>
-    </body>
   </head>
+  <body>
+    <%- include("partials/header.ejs") %>
+    <div class="main">
+      <div class="user-details">
+        <h2><%= user.u_name %></h2>
+        <h2><%= user.u_role %></h2>
+        <h2>ID: <%= user.u_id %></h2>
+      </div>
+      
+      <h2>Current Location: <%= l_name %></h2>
+
+      <h1>Current Task</h1>
+      <%- include("partials/table.ejs", { tableData: [task] }) %>
+
+      <h1>Products</h1>
+      <%- include("partials/table.ejs", { tableData: products.data }) %>
+
+      <% if (products.missing) { %>
+        <h1>Missing Products</h1>
+        <%- include("partials/table.ejs", { tableData: products.missing }) %>
+      <% } %>
+    </div>
+    <form action="/task/<%= task.t_id %>" method="post">
+      <button type="submit">Complete Task</button>
+    </form>
+  </body>
 </html>

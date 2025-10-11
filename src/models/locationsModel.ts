@@ -90,31 +90,9 @@ export default class Location {
     WHERE a.l_role = 'storage' AND b.p_id = ANY($1)
     ORDER BY a.l_name;`;
 
-    const output = await db.query<LocationData>(query, [
+    const { rows } = await db.query<LocationData>(query, [
       Array.from(products.keys()),
     ]);
-
-    const data: LocationData[] = [];
-    // keep track of how much stock required for each product
-    const remainder = new Map(products);
-
-    // get locations names & amount of stock to take for each product
-    output.rows.forEach(({ l_name, p_id, stock, pa_id }) => {
-      if (!remainder.get(p_id)) return;
-      const required = remainder.get(p_id) ?? 0;
-      if (required > stock) {
-        // location does not have enough stock
-        data.push({ l_name, p_id, stock, pa_id });
-        remainder.set(p_id, required - stock);
-      } else {
-        // location has enough stock
-        data.push({ l_name, p_id, stock: required, pa_id });
-        remainder.delete(p_id);
-      }
-    });
-
-    // get products with not enough stock
-    const missing = Array.from(remainder.entries());
-    return { data, missing };
+    return rows;
   }
 }

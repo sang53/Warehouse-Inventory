@@ -11,6 +11,7 @@ import { ProductPallet } from "../models/palletsModel.ts";
 import Task, { FullTask } from "../models/tasksModel.ts";
 import User from "../models/usersModel.ts";
 import { completeOrder } from "./orders.ts";
+import { removeFromStorage } from "./stock.ts";
 
 const NEWPALLET = ["arrival", "pick"] as const;
 const LTYPEMAP = {
@@ -68,7 +69,7 @@ export async function completeTask(task: FullTask) {
     await Location.movePallet(task.pa_id, task.l_id);
 
   await task.complete();
-  return await nextTask(task, order);
+  await nextTask(task, order);
 }
 
 export async function nextTask(task: FullTask, order: Order) {
@@ -93,16 +94,6 @@ function iterateTaskType(t_type: TaskType) {
   const newTType = TASK_TYPES[idx + 1];
   if (!newTType) throw new Error("System Error");
   return newTType;
-}
-
-async function removeFromStorage(products: Map<number, number>) {
-  const { data, missing } = await Location.getByProducts(products);
-  // Handle case of not enough stock
-  if (missing.length)
-    throw new Error(`Not Enough Stock: ${JSON.stringify(missing)}`);
-
-  // remove stock from storage pallets
-  await ProductPallet.removeProducts(data);
 }
 
 function needsLocation(t_type: TaskType): t_type is keyof typeof LTYPEMAP {

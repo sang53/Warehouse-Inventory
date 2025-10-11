@@ -160,6 +160,12 @@ export class FullTask extends Task {
   }
 
   static async cancelTask(u_id: number) {
-    await GeneralModel.update(this.RelsTable, { u_id: null }, { u_id });
+    const [task] = await FullTask.getByRels({ u_id });
+
+    // Reset started timestamp & remove u_id from rels table
+    await Promise.all([
+      GeneralModel.update(this.RelsTable, { u_id: null }, { u_id }),
+      task.setStart(false),
+    ]);
   }
 }

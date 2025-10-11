@@ -1,4 +1,3 @@
-add remove pallet on completed export order in service layer
 Redo orders form to provide products[] and stocks[]
 Remove unnecessary views => display view
 Add comments

@@ -1,7 +1,7 @@
 import { OrderType, T_IN, TASK_TYPES } from "../config/tableTypes.ts";
 import Location from "../models/locationsModel.ts";
 import Order, { ProductOrder } from "../models/ordersModel.ts";
-import Pallet from "../models/palletsModel.ts";
+import Pallet, { ProductPallet } from "../models/palletsModel.ts";
 import { FullTask } from "../models/tasksModel.ts";
 
 export async function createOrder(
@@ -28,7 +28,12 @@ async function createFirstTask(o_type: OrderType) {
 
 export async function completeOrder(task: FullTask, order: Order) {
   // remove pallet from location
-  await Location.movePallet(task.pa_id);
+  if (order.o_type === "OUT") {
+    await Promise.all([
+      Location.movePallet(task.pa_id),
+      ProductPallet.removePallet(task.pa_id),
+    ]);
+  }
   await order.complete();
   return null;
 }

@@ -1,7 +1,6 @@
 import { TNAMES } from "../config/tableSchema.ts";
 import { T_OUT } from "../config/tableTypes.ts";
 import GeneralModel from "./generalModel.ts";
-import { LocationData } from "./locationsModel.ts";
 import db from "../config/pool.ts";
 
 type PaOutput = T_OUT["PALLETS"];
@@ -71,17 +70,22 @@ export class ProductPallet extends Pallet {
     return new ProductPallet({ pa_id: data.pa_id }, output);
   }
 
-  static async removeProducts(data: LocationData[]) {
+  static async removeProducts(data: POutput[]) {
     const query = `
     UPDATE p_pa
-    SET stock = stock - $3
-    WHERE p_id = $1 AND pa_id = $2;`;
+    SET stock = stock - $1
+    WHERE p_id = $2 AND pa_id = $3;`;
 
     await Promise.allSettled(
       data.map(({ p_id, pa_id, stock }) =>
-        db.query(query, [p_id, pa_id, stock]),
+        db.query(query, [stock, p_id, pa_id]),
       ),
     );
+  }
+
+  static async removePallet(pa_id: number) {
+    await GeneralModel.remove("P_PA", { pa_id });
+    await GeneralModel.remove("PALLETS", { pa_id });
   }
 
   async addProduct(p_id: number, stock: number) {
