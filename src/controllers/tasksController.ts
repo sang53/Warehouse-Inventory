@@ -4,12 +4,12 @@ import { checkValidation, validateInt } from "../middlewares/validate.ts";
 import { matchedData } from "express-validator";
 import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
 import { completeTask } from "../services/tasks.ts";
-import getTaskLocals from "../getLocals/getTaskLocals.ts";
 import {
   AuthenticatedRequest,
   ensureRole,
 } from "../middlewares/authenticate.ts";
 import { ProductOrder } from "../models/ordersModel.ts";
+import mapToView from "../utils/mapToView.ts";
 
 export const tasksGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
@@ -38,12 +38,17 @@ export const tasksIDGet = [
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
-    const [[task], order] = await Promise.all([
+
+    const [tasks, { products, ...order }] = await Promise.all([
       FullTask.getFull({ t_id: id }),
       ProductOrder.getFull({ t_id: id }),
     ]);
 
-    res.locals = getTaskLocals({ task, order });
+    res.locals = getDisplayLocals([
+      { title: `Task ${String(id)}`, tableData: tasks },
+      { title: `Order ${String(order.o_id)}`, tableData: [order] },
+      { title: "Products", tableData: mapToView(products) },
+    ]);
     next();
   },
 ];

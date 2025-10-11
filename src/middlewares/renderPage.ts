@@ -8,13 +8,16 @@ interface FilledLocals {
 export default function (_req: Request, res: Response) {
   const { locals } = res;
   assertLocals(locals);
+
   res.render(locals.view, locals.viewData);
 }
 
+// make sure .locals has correct shape for rendering
 function assertLocals(
   locals: Partial<FilledLocals>,
 ): asserts locals is FilledLocals {
   const { view, viewData } = locals;
+
   if (!view || typeof view !== "string") {
     console.error("Invalid view: " + JSON.stringify(locals));
     throw new Error("System Error");

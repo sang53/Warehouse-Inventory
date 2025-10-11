@@ -4,8 +4,8 @@ import getCurrentLocals from "../getLocals/getCurrentLocals.ts";
 import { AuthenticatedRequest } from "../middlewares/authenticate.ts";
 import Order, { ProductOrder } from "../models/ordersModel.ts";
 import Location from "../models/locationsModel.ts";
-import getIndexLocals from "../getLocals/getIndexLocals.ts";
 import { FullTask } from "../models/tasksModel.ts";
+import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
 
 export const indexGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
@@ -15,11 +15,18 @@ export const indexGet = [
       await FullTask.getByComplete(false),
     ]);
 
-    res.locals = getIndexLocals({
-      inOrders,
-      outOrders,
-      tasks,
-    });
+    res.locals = getDisplayLocals([
+      {
+        title: "Current Tasks",
+        tableData: tasks,
+      },
+      { title: "Current Incoming Orders", tableData: inOrders },
+      {
+        title: "Current Outgoing Orders",
+        tableData: outOrders,
+      },
+    ]);
+
     next();
   },
 ];

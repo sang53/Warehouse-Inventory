@@ -10,6 +10,8 @@ export async function createOrder(
   stock: number[],
 ) {
   const task = await createFirstTask(o_type);
+
+  // assign new task to new order
   const order = await ProductOrder.create(
     { o_type },
     task.t_id,
@@ -20,15 +22,17 @@ export async function createOrder(
 }
 
 async function createFirstTask(o_type: OrderType) {
-  const taskData =
-    o_type === "IN" ? { t_type: TASK_TYPES[0] } : { t_type: TASK_TYPES[3] };
+  // get corresponding task type for order type
+  const t_type = o_type === "IN" ? TASK_TYPES[0] : TASK_TYPES[3];
+
+  // create new pallet and assign to new task
   const pallet = await Pallet.create();
-  return await FullTask.create(taskData, pallet.pa_id);
+  return await FullTask.create({ t_type }, pallet.pa_id);
 }
 
 export async function completeOrder(task: FullTask, order: Order) {
-  // remove pallet from location
   if (order.o_type === "OUT") {
+    // if out order: remove palletfrom location and DB
     await Promise.all([
       Location.movePallet(task.pa_id),
       ProductPallet.removePallet(task.pa_id),

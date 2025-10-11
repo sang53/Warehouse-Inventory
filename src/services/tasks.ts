@@ -25,11 +25,13 @@ const END_ORDER_MAP: Record<OrderType, TaskType> = {
 } as const;
 
 export async function getCurrentTask(user: User, start: boolean = true) {
-  // return if task already assigned || not starting new task
   try {
+    // if task already assigned to user
     const [task] = await FullTask.getByRels({ u_id: user.u_id });
     return task;
   } catch {
+    // if only retrieving current task:
+    // return if no task assigned
     if (!start) return null;
   }
 
@@ -55,21 +57,21 @@ async function startTask(task: Task, user: User) {
 export async function completeTask(task: FullTask) {
   const order = await Order.getByTask(task.t_id);
   if (needsPallet(task.t_type)) {
-    const pallet = await ProductPallet.get({ pa_id: task.pa_id });
-    const fullOrder = await ProductOrder.getProducts(order);
+    const [pallet, fullOrder] = await Promise.all([
+      ProductPallet.get({ pa_id: task.pa_id }),
+      ProductOrder.getProducts(order),
+    ]);
 
     // remove products from storage if picking task
     if (task.t_type === "pick") await removeFromStorage(fullOrder.products);
 
     // add products to pallet
     await pallet.addProductsMap(fullOrder.products);
-  }
-  if (needsLocation(task.t_type))
+  } else if (needsLocation(task.t_type))
     // move pallet to new location
     await Location.movePallet(task.pa_id, task.l_id);
 
-  await task.complete();
-  await nextTask(task, order);
+  await Promise.all([task.complete(), nextTask(task, order)]);
 }
 
 export async function nextTask(task: FullTask, order: Order) {
@@ -92,7 +94,8 @@ export async function nextTask(task: FullTask, order: Order) {
 function iterateTaskType(t_type: TaskType) {
   const idx = TASK_TYPES.findIndex((value) => value === t_type);
   const newTType = TASK_TYPES[idx + 1];
-  if (!newTType) throw new Error("System Error");
+
+  if (!newTType) throw new Error("System Error"); // for TS error
   return newTType;
 }
 

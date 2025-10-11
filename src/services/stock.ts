@@ -13,22 +13,31 @@ export async function removeFromStorage(products: Map<number, number>) {
 
 export async function getProductInfo(products: Map<number, number>) {
   const output = await Location.getByProducts(products);
-
   const data: typeof output = [];
+
   // keep track of how much stock required for each product
   const remainder = new Map(products);
 
   // get locations names & amount of stock to take for each product
   output.forEach(({ l_name, p_id, stock, pa_id }) => {
-    if (!remainder.get(p_id)) return;
+    if (!remainder.get(p_id))
+      // product already retrieved from locations
+      return;
+
     const required = remainder.get(p_id) ?? 0;
     if (required > stock) {
-      // location does not have enough stock
+      // location does not have enough stock:
+      // take all available stock from location
       data.push({ l_name, p_id, stock, pa_id });
+
+      // update required amount of stock
       remainder.set(p_id, required - stock);
     } else {
-      // location has enough stock
+      // location has enough stock:
+      // retrieve required stock from location
       data.push({ l_name, p_id, stock: required, pa_id });
+
+      // product no longer needed
       remainder.delete(p_id);
     }
   });

@@ -10,7 +10,7 @@ import { matchedData } from "express-validator";
 import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
 import getFormLocals from "../getLocals/getFormLocals.ts";
 import { createOrder } from "../services/orders.ts";
-import getOrderLocals from "../getLocals/getOrderLocals.ts";
+import mapToView from "../utils/mapToView.ts";
 
 export const ordersGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
@@ -72,8 +72,13 @@ export const ordersIDGet = [
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
-    const order = await ProductOrder.getFull({ o_id: id });
-    res.locals = getOrderLocals({ order });
+
+    const { products, ...order } = await ProductOrder.getFull({ o_id: id });
+
+    res.locals = getDisplayLocals([
+      { title: `Order ${String(id)}`, tableData: [order] },
+      { title: "Products", tableData: mapToView(products) },
+    ]);
     next();
   },
 ];

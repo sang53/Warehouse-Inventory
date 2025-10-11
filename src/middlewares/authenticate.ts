@@ -6,20 +6,17 @@ export interface AuthenticatedRequest extends Request {
   user: User;
 }
 
-export function isAuthenticated(req: Request): req is AuthenticatedRequest {
-  return req.isAuthenticated();
-}
-
 export function ensureAuthenticated(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   // redirect to login page if not logged in
-  if (isAuthenticated(req)) next();
+  if (req.isAuthenticated()) next();
   else res.redirect("/login");
 }
 
+// returns middleware function that only allows given roles &| admin
 export function ensureRole(u_roles: UserType[] = [], admin: boolean = true) {
   return (req: Request, _res: Response, next: NextFunction) => {
     const user = (req as AuthenticatedRequest).user;
