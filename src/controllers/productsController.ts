@@ -13,10 +13,18 @@ import { ensureRole } from "../middlewares/authenticate.ts";
 
 export const productsGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
+    const [id, net] = await Promise.all([
+      Product.getAllStock("p_id", 50),
+      Product.getAllStock("net_stock"),
+    ]);
     res.locals = getDisplayLocals([
       {
-        title: "Products",
-        tableData: await Product.getAll(),
+        title: "All Products",
+        tableData: id,
+      },
+      {
+        title: "Products by Net Stock",
+        tableData: net,
       },
     ]);
     next();

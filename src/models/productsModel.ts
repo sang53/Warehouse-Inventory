@@ -1,5 +1,6 @@
 import { T_IN, T_OUT } from "../config/tableTypes.ts";
 import GeneralModel from "./generalModel.ts";
+import db from "../config/pool.ts";
 
 const TableName = "PRODUCTS" as const;
 type Input = T_IN[typeof TableName];
@@ -37,5 +38,51 @@ export default class Product {
   static async update(data: Partial<Output>, conditions?: Partial<Output>) {
     const output = await GeneralModel.update(this.table, data, conditions);
     return output.map((product) => new Product(product));
+  }
+
+  static async getAllStock(order: "p_id" | "net_stock", limit: number = 20) {
+    type ProductStocks = {
+      p_id: number;
+      p_name: string;
+      storage: number;
+      incoming: number;
+      outgoing: number;
+      net_stock: number;
+    };
+
+    const storage_totals = `
+    WITH storage_totals as (
+    SELECT p.p_id, SUM(pa.stock) as storage
+    FROM products p
+    LEFT JOIN p_pa pa ON p.p_id = pa.p_id
+    LEFT JOIN locations l ON pa.pa_id = l.pa_id
+    AND l.l_role = 'storage'
+    GROUP BY p.p_id),`;
+    const order_totals = `
+    order_totals AS (
+    SELECT op.p_id, SUM(CASE WHEN o.o_type = 'IN' THEN op.stock ELSE 0 END) AS incoming,
+    SUM(CASE WHEN o.o_type = 'OUT' THEN op.stock ELSE 0 END) AS outgoing
+    FROM o_p op
+    JOIN orders o ON o.o_id = op.o_id
+    GROUP BY op.p_id)`;
+    const query = `
+    SELECT sub.p_id, sub.p_name, sub.storage, sub.incoming, sub.outgoing,
+    (sub.storage + sub.incoming - sub.outgoing) as net_stock
+    FROM (
+      SELECT p.p_id, p.p_name,
+        COALESCE(s.storage, 0) as storage,
+        COALESCE(o.incoming, 0) AS incoming,
+        COALESCE(o.outgoing, 0) AS outgoing
+      FROM products p
+      LEFT JOIN storage_totals s ON p.p_id = s.p_id
+      LEFT JOIN order_totals o ON p.p_id = o.p_id
+    ) AS sub
+    ORDER BY sub.${order}
+    LIMIT ${String(limit)}`;
+
+    const { rows } = await db.query<ProductStocks>(
+      storage_totals + order_totals + query,
+    );
+    return rows;
   }
 }

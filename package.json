@@ -4,7 +4,8 @@
   "type": "module",
   "description": "",
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint src/",
+    "check": "tsc --noEmit src/app.ts",
     "start": "nodemon src/app.ts",
     "do": "node --loader ts-node/esm"
   },
