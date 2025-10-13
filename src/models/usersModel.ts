@@ -1,25 +1,31 @@
-import { T_IN, T_OUT, UserType } from "../config/tableTypes.ts";
 import GeneralModel from "./generalModel.ts";
 import * as argon2 from "argon2";
 
-const TableName = "USERS" as const;
-type Input = T_IN[typeof TableName];
-type Output = T_OUT[typeof TableName];
+export interface InUser {
+  username: string;
+  password: string;
+  u_name: string;
+  u_role: UserType;
+}
+
+export interface OutUser extends InUser {
+  u_id: number;
+}
+
+export type UserType = "intake" | "picker" | "outgoing" | "admin";
 export default class User {
   u_id: number;
   u_name: string;
   u_role: UserType;
 
-  static table = TableName;
-
-  constructor(data: Output) {
+  constructor(data: OutUser) {
     this.u_id = data.u_id;
     this.u_role = data.u_role;
     this.u_name = data.u_name;
   }
 
-  static async get(data: Partial<Output>, limit?: number | null) {
-    const output = await GeneralModel.get(User.table, {
+  static async get(data: Partial<OutUser>, limit?: number | null) {
+    const output = await GeneralModel.get("users", {
       conditions: data,
       limit,
     });
@@ -28,17 +34,17 @@ export default class User {
   }
 
   static async getAll() {
-    const output = await GeneralModel.get(User.table, { limit: 50 });
+    const output = await GeneralModel.get("users", { limit: 50 });
     return output.map((user) => new User(user));
   }
 
-  static async update(data: Partial<Output>, conditions?: Partial<Output>) {
-    const output = await GeneralModel.update(User.table, data, conditions);
+  static async update(data: Partial<OutUser>, conditions?: Partial<OutUser>) {
+    const output = await GeneralModel.update("users", data, conditions);
     return output.map((user) => new User(user));
   }
 
   static async getAuthUser(username: string) {
-    const output = await GeneralModel.get(User.table, {
+    const output = await GeneralModel.get("users", {
       conditions: { username },
       limit: 1,
     });
@@ -51,15 +57,15 @@ export class VerifyUser extends User {
   username: string;
   password: string;
 
-  constructor(data: Output) {
+  constructor(data: OutUser) {
     super(data);
     this.username = data.username;
     this.password = data.password;
   }
 
-  static async create(data: Input) {
+  static async create(data: InUser) {
     data.password = await argon2.hash(data.password);
-    const output = await GeneralModel.create(User.table, data);
+    const output = await GeneralModel.create("users", data);
     return new User(output);
   }
 }

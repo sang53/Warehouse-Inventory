@@ -1,9 +1,37 @@
-import { TNAMES } from "../config/tableSchema.ts";
-import { T_IN, T_OUT } from "../config/tableTypes.ts";
 import db from "../config/pool.ts";
 import { PoolClient } from "pg";
+import { InLocation, OutLocation } from "./locationsModel.ts";
+import { OrderType, OutOrder } from "./ordersModel.ts";
+import { OutPallet, ProductStock } from "./palletsModel.ts";
+import { InProduct, OutProduct } from "./productsModel.ts";
+import { InUser, OutUser } from "./usersModel.ts";
+import { InTask, InTaskRel, OutTask, OutTaskRel } from "./tasksModel.ts";
 
-type TableNames = keyof typeof TNAMES;
+interface TableInputs {
+  products: InProduct;
+  pallets: object;
+  p_pa: ProductStock & { pa_id: number };
+  locations: InLocation;
+  orders: { o_type: OrderType };
+  o_t: { o_id: number; t_id: number };
+  o_p: ProductStock & { o_id: number };
+  tasks: InTask;
+  taskRels: InTaskRel;
+  users: InUser;
+}
+
+interface TableOutputs extends TableInputs {
+  products: OutProduct;
+  pallets: OutPallet;
+  locations: OutLocation;
+  orders: OutOrder;
+  tasks: OutTask;
+  taskRels: OutTaskRel;
+  users: OutUser;
+}
+
+type TableNames = keyof TableOutputs;
+
 interface SelectOptions<K, C = K> {
   limit?: number | null;
   order?: Extract<keyof K, string>[];
@@ -14,17 +42,17 @@ interface SelectOptions<K, C = K> {
 export default (function () {
   async function create<TName extends TableNames>(
     table: TName,
-    data?: T_IN[TName],
+    data?: TableInputs[TName],
     client?: PoolClient,
   ) {
     const connection = client ?? db;
     const queryValues = data
       ? `${getColumnNames(data)} VALUES ${getPlaceholders(Object.keys(data).length)}`
       : "";
-    const query = `INSERT INTO ${TNAMES[table]} ${queryValues} RETURNING *;`;
+    const query = `INSERT INTO ${table} ${queryValues} RETURNING *;`;
     const values = getValues(data);
 
-    const output = await connection.query<T_OUT[TName]>(query, values);
+    const output = await connection.query<TableOutputs[TName]>(query, values);
     return parseOutput(output.rows)[0];
   }
 
@@ -35,25 +63,25 @@ export default (function () {
       limit = 1,
       desc = false,
       conditions,
-    }: SelectOptions<T_OUT[TName]> = {},
+    }: SelectOptions<TableOutputs[TName]> = {},
   ) {
-    let query = `SELECT * FROM ${TNAMES[table]}`;
+    let query = `SELECT * FROM ${table}`;
     query += getConditionals(1, conditions);
     query += getOrder(order, desc);
     query += getLimit(limit);
     query += ";";
 
-    const output = await db.query<T_OUT[TName]>(query, getValues(conditions));
+    const output = await db.query<TableOutputs[TName]>(
+      query,
+      getValues(conditions),
+    );
     return output.rows;
   }
 
-  async function getJoin<
-    T1 extends T_OUT[TableNames],
-    T2 extends T_OUT[TableNames] = T1,
-  >(
+  async function getJoin<T1 extends TableOutputs[TableNames]>(
     join: string,
     tableName: string,
-    { order, limit = 1, desc = false, conditions }: SelectOptions<T1 & T2> = {},
+    { order, limit = 1, desc = false, conditions }: SelectOptions<T1> = {},
   ) {
     const tablePrefix = tableName ? tableName + "." : "";
     let query = `SELECT * FROM ${join}`;
@@ -62,25 +90,30 @@ export default (function () {
     query += getLimit(limit);
     query += ";";
 
-    const output = await db.query<T1 & T2>(query, getValues(conditions));
+    const output = await db.query<T1>(query, getValues(conditions));
     return output.rows;
   }
 
   async function getArray<
     TName extends TableNames,
-    CName extends Extract<keyof T_OUT[TName], string>,
+    CName extends Extract<keyof TableOutputs[TName], string>,
   >(
     table: TName,
     column: CName,
-    values: T_OUT[TName][CName][],
-    { order, limit = 1, desc = false, conditions }: SelectOptions<T_OUT[TName]>,
+    values: TableOutputs[TName][CName][],
+    {
+      order,
+      limit = 1,
+      desc = false,
+      conditions,
+    }: SelectOptions<TableOutputs[TName]>,
   ) {
     const CQuery = conditions
       ? getConditionals(1, conditions) +
         ` AND ${column} = ANY($${String(Object.keys(conditions).length + 1)})`
       : ` WHERE ${column} = ANY($1)`;
     const CValues = conditions ? Object.values(conditions) : [];
-    const output = await db.query<T_OUT[TName]>(
+    const output = await db.query<TableOutputs[TName]>(
       `SELECT * from ${table}${CQuery}${getOrder(order, desc)}${getLimit(limit)};`,
       [...CValues, values],
     );
@@ -89,12 +122,12 @@ export default (function () {
 
   async function update<TName extends TableNames>(
     table: TName,
-    data: Partial<T_OUT[TName]>,
-    conditions?: Partial<T_OUT[TName]>,
+    data: Partial<TableOutputs[TName]>,
+    conditions?: Partial<TableOutputs[TName]>,
   ) {
     const dataPlaceholder = Object.keys(data).length;
-    const output = await db.query<T_OUT[TName]>(
-      `UPDATE ${TNAMES[table]} SET ${getColumnNames(data)} = ${getPlaceholders(dataPlaceholder)}
+    const output = await db.query<TableOutputs[TName]>(
+      `UPDATE ${table} SET ${getColumnNames(data)} = ${getPlaceholders(dataPlaceholder)}
       ${getConditionals(dataPlaceholder + 1, conditions)} RETURNING *;`,
       Object.values(data).concat(getValues(conditions)),
     );
@@ -103,31 +136,31 @@ export default (function () {
 
   async function remove<TName extends TableNames>(
     table: TName,
-    conditions: Partial<T_OUT[TName]>,
+    conditions: Partial<TableOutputs[TName]>,
   ) {
-    const query = `DELETE FROM ${TNAMES[table]}
+    const query = `DELETE FROM ${table}
     ${getConditionals(1, conditions)};`;
     await db.query(query, getValues(conditions));
   }
 
   async function timestamp<
     TName extends TableNames,
-    TCol extends keyof T_OUT[TName],
+    TCol extends keyof TableOutputs[TName],
   >(
     table: TName,
     column: TCol,
-    conditions: Partial<T_OUT[TName]>,
+    conditions: Partial<TableOutputs[TName]>,
     value: boolean,
   ) {
-    const output = await db.query<Pick<T_OUT[TName], TCol>>(
-      `UPDATE ${TNAMES[table]} SET ${String(column)} = ${value ? "NOW()" : "NULL"}
+    const output = await db.query<Pick<TableOutputs[TName], TCol>>(
+      `UPDATE ${table} SET ${String(column)} = ${value ? "NOW()" : "NULL"}
       ${getConditionals(1, conditions)} RETURNING ${String(column)};`,
       getValues(conditions),
     );
     return parseOutput(output.rows)[0][column];
   }
 
-  function getColumnNames(data: Partial<T_OUT[TableNames] | T_IN[TableNames]>) {
+  function getColumnNames(data: Partial<TableOutputs[TableNames]>) {
     return `(${Object.keys(data).join(", ")})`;
   }
 
@@ -137,7 +170,7 @@ export default (function () {
 
   function getConditionals(
     placeholder: number,
-    conditions?: Partial<T_OUT[TableNames]>,
+    conditions?: Partial<TableOutputs[TableNames]>,
     tablePrefix?: string,
   ) {
     if (!conditions) return "";

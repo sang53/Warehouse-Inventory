@@ -48,7 +48,7 @@ export const productsNewPost = [
   validateAlphaNum("p_name"),
   checkValidation,
   async (req: Request, res: Response) => {
-    const { p_name } = matchedData<T_IN["PRODUCTS"]>(req);
+    const { p_name } = matchedData<{ p_name: string }>(req);
     const product = await Product.create({ p_name });
     res.redirect(`/products/${String(product.p_id)}`);
   },

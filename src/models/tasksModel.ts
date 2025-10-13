@@ -1,14 +1,39 @@
-import { T_IN, T_OUT, TaskType } from "../config/tableTypes.ts";
-import { TNAMES } from "../config/tableSchema.ts";
 import GeneralModel from "./generalModel.ts";
 import db from "../config/pool.ts";
 
-const TableName = "TASKS" as const;
-const RelsTable = "TASKREL" as const;
+export interface InTask {
+  t_type: TaskType;
+}
 
-type Input = T_IN[typeof TableName];
-type Output = T_OUT[typeof TableName];
-type Rels = T_OUT[typeof RelsTable];
+export interface OutTask extends InTask {
+  t_id: number;
+  placed: string;
+  started: string | null;
+  completed: string | null;
+}
+
+export interface InTaskRel {
+  t_id: number;
+  l_id?: number | null;
+  pa_id: number;
+  u_id?: number | null;
+}
+
+export interface OutTaskRel extends InTaskRel {
+  l_id: number | null;
+  pa_id: number;
+  u_id: number | null;
+}
+
+type OutFullTask = OutTask & OutTaskRel;
+
+export type TaskType =
+  | "arrival"
+  | "intake"
+  | "storage"
+  | "pick"
+  | "outgoing"
+  | "export";
 
 export default class Task {
   t_id: number;
@@ -17,9 +42,7 @@ export default class Task {
   started: string | null;
   completed: string | null;
 
-  static table = TableName;
-
-  constructor(data: Output) {
+  constructor(data: OutTask) {
     this.t_id = data.t_id;
     this.t_type = data.t_type;
     this.placed = data.placed;
@@ -27,8 +50,8 @@ export default class Task {
     this.completed = data.completed;
   }
 
-  static async get(data: Partial<Output>, limit?: number | null) {
-    const output = await GeneralModel.get(Task.table, {
+  static async get(data: Partial<OutTask>, limit?: number | null) {
+    const output = await GeneralModel.get("tasks", {
       conditions: data,
       limit,
     });
@@ -37,12 +60,12 @@ export default class Task {
   }
 
   static async getAll() {
-    const output = await GeneralModel.get(Task.table, { limit: 50 });
+    const output = await GeneralModel.get("tasks", { limit: 50 });
     return output.map((task) => new Task(task));
   }
 
   static async getNewByTypes(types: TaskType[]) {
-    const [task] = await GeneralModel.getArray(this.table, "t_type", types, {
+    const [task] = await GeneralModel.getArray("tasks", "t_type", types, {
       order: ["placed"],
       conditions: { started: null },
     });
@@ -66,7 +89,7 @@ export default class Task {
 
   async #timestamp(column: "started" | "completed", value: boolean = true) {
     this[column] = await GeneralModel.timestamp(
-      Task.table,
+      "tasks",
       column,
       {
         t_id: this.t_id,
@@ -75,8 +98,8 @@ export default class Task {
     );
   }
 
-  async updateRels(data: Partial<Rels>) {
-    const [rels] = await GeneralModel.update(FullTask.RelsTable, data, {
+  async updateRels(data: Partial<OutTaskRel>) {
+    const [rels] = await GeneralModel.update("taskRels", data, {
       t_id: this.t_id,
     });
     return Object.assign(this, rels);
@@ -84,16 +107,15 @@ export default class Task {
 }
 
 export class FullTask extends Task {
-  static RelsTable = RelsTable;
-  static joinQuery = `${TNAMES[Task.table]} a
-    LEFT JOIN ${TNAMES[FullTask.RelsTable]} b
+  static joinQuery = `tasks a
+    LEFT JOIN taskRels b
     ON a.t_id = b.t_id`;
 
   pa_id: number;
   l_id: number | null;
   u_id: number | null;
 
-  constructor(task: Output, data: Rels) {
+  constructor(task: OutTask, data: OutTaskRel) {
     super(task);
     this.l_id = data.l_id;
     this.pa_id = data.pa_id;
@@ -101,12 +123,12 @@ export class FullTask extends Task {
   }
 
   static async create(
-    data: Input,
+    data: InTask,
     pa_id: number,
     rels?: { u_id?: number | null; l_id?: number | null },
   ) {
-    const output = await GeneralModel.create(Task.table, data);
-    const relsOutput = await GeneralModel.create(this.RelsTable, {
+    const output = await GeneralModel.create("tasks", data);
+    const relsOutput = await GeneralModel.create("taskRels", {
       ...rels,
       pa_id,
       t_id: output.t_id,
@@ -115,12 +137,12 @@ export class FullTask extends Task {
   }
 
   static async getFull(
-    data: Partial<Output & Rels>,
-    order?: Extract<keyof Output | keyof Rels, string>[],
+    data: Partial<OutTask>,
+    order?: Extract<keyof OutTask, string>[],
     limit?: number | null,
     desc?: boolean,
   ) {
-    const output = await GeneralModel.getJoin<Output, Rels>(
+    const output = await GeneralModel.getJoin<OutFullTask>(
       this.joinQuery,
       "a",
       { conditions: data, order, limit, desc },
@@ -129,8 +151,8 @@ export class FullTask extends Task {
     return GeneralModel.parseOutput(tasks);
   }
 
-  static async getByRels(data: Partial<Rels>, limit?: number | null) {
-    const output = await GeneralModel.getJoin<Output, Rels>(
+  static async getByRels(data: Partial<OutTaskRel>, limit?: number | null) {
+    const output = await GeneralModel.getJoin<OutFullTask>(
       this.joinQuery,
       "b",
       { conditions: data, limit },
@@ -141,18 +163,18 @@ export class FullTask extends Task {
 
   static async getByComplete(complete: boolean) {
     const query = `SELECT * FROM 
-    ${TNAMES[Task.table]} a
-    LEFT JOIN ${TNAMES[FullTask.RelsTable]} b
+    tasks a
+    LEFT JOIN taskRels b
     ON a.t_id = b.t_id
     WHERE a.completed IS${complete ? " NOT" : ""} NULL
     ORDER BY a.placed
     LIMIT 20;`;
-    const output = await db.query<Output & Rels>(query);
+    const output = await db.query<OutFullTask>(query);
     return output.rows.map((task) => new FullTask(task, task));
   }
 
   static async getRels(task: Task) {
-    const output = await GeneralModel.get(FullTask.RelsTable, {
+    const output = await GeneralModel.get("taskRels", {
       conditions: { t_id: task.t_id },
     });
     const [rels] = GeneralModel.parseOutput(output);
@@ -164,7 +186,7 @@ export class FullTask extends Task {
 
     // Reset started timestamp & remove u_id from rels table
     await Promise.all([
-      GeneralModel.update(this.RelsTable, { u_id: null }, { u_id }),
+      GeneralModel.update("taskRels", { u_id: null }, { u_id }),
       task.setStart(false),
     ]);
   }

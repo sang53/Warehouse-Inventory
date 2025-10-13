@@ -1,27 +1,30 @@
-import { TNAMES } from "../config/tableSchema.ts";
-import { T_OUT } from "../config/tableTypes.ts";
 import GeneralModel from "./generalModel.ts";
 import db from "../config/pool.ts";
 
-type PaOutput = T_OUT["PALLETS"];
-type POutput = T_OUT["P_PA"];
+export interface OutPallet {
+  pa_id: number;
+}
+
+export interface ProductStock {
+  p_id: number;
+  stock: number;
+}
 
 // Basic Pallet Model
 export default class Pallet {
-  static PalletTable = "PALLETS" as const;
   pa_id: number;
 
-  constructor({ pa_id }: PaOutput) {
+  constructor({ pa_id }: OutPallet) {
     this.pa_id = pa_id;
   }
 
   static async create() {
-    const output = await GeneralModel.create(Pallet.PalletTable);
+    const output = await GeneralModel.create("pallets");
     return new Pallet(output);
   }
 
   static async getAll() {
-    const output = await GeneralModel.get(Pallet.PalletTable, {
+    const output = await GeneralModel.get("pallets", {
       desc: true,
       order: ["pa_id"],
     });
@@ -29,7 +32,7 @@ export default class Pallet {
   }
 
   async getProducts() {
-    const output = await GeneralModel.get(ProductPallet.ProductTable, {
+    const output = await GeneralModel.get("p_pa", {
       conditions: {
         pa_id: this.pa_id,
       },
@@ -43,49 +46,79 @@ export default class Pallet {
 export class ProductPallet extends Pallet {
   static ProductTable = "P_PA" as const;
 
-  // joins pallets & pallet_products table
-  static joinQuery = `${TNAMES[ProductPallet.ProductTable]} AS a
-  LEFT JOIN ${TNAMES[Pallet.PalletTable]} AS b
-  ON a.pa_id = b.pa_id`;
-
   // Map: {p_id: stock}
   products: Map<number, number>;
 
-  constructor(pallet: PaOutput, products: POutput[]) {
+  constructor(pallet: OutPallet, products: ProductStock[]) {
     super(pallet);
     this.products = this.#initProducts(products);
   }
 
   // create .products map
-  #initProducts(products: POutput[]) {
+  #initProducts(products: ProductStock[]) {
     return new Map(products.map(({ p_id, stock }) => [p_id, stock]));
   }
 
-  static async get(data: PaOutput) {
-    const output = await GeneralModel.getJoin<PaOutput, POutput>(
-      ProductPallet.joinQuery,
-      "a",
-      { conditions: data },
-    );
+  static async get(data: OutPallet) {
+    const output = await GeneralModel.get("p_pa", {
+      conditions: data,
+      limit: null,
+    });
     return new ProductPallet({ pa_id: data.pa_id }, output);
   }
 
-  static async removeProducts(data: POutput[]) {
-    const query = `
-    UPDATE p_pa
-    SET stock = stock - $1
-    WHERE p_id = $2 AND pa_id = $3;`;
+  static async removeProducts(data: (ProductStock & OutPallet)[]) {
+    const values = data
+      .map(
+        (_, i) =>
+          `($${String(i * 3 + 1)}::int, $${String(i * 3 + 2)}::int, $${String(i * 3 + 3)}::int)`,
+      )
+      .join(", ");
 
-    await Promise.allSettled(
-      data.map(({ p_id, pa_id, stock }) =>
-        db.query(query, [stock, p_id, pa_id]),
-      ),
-    );
+    const query = `
+    UPDATE p_pa AS target
+    SET stock = target.stock - v.stock
+    FROM (
+      VALUES ${values}
+    ) AS v(p_id, pa_id, stock)
+    WHERE target.p_id = v.p_id
+      AND target.pa_id = v.pa_id
+    RETURNING target.pa_id;`;
+
+    const params = data.flatMap(({ p_id, pa_id, stock }) => [
+      p_id,
+      pa_id,
+      stock,
+    ]);
+    const { rows: paIds } = await db.query<OutPallet>(query, params);
+    return paIds.map(({ pa_id }) => pa_id);
   }
 
   static async removePallet(pa_id: number) {
-    await GeneralModel.remove("P_PA", { pa_id });
-    await GeneralModel.remove("PALLETS", { pa_id });
+    // rows from p_pa deleted automatically through cascade
+    await GeneralModel.remove("pallets", { pa_id });
+  }
+
+  static async removeEmpty(paIds: number[]) {
+    const productsQuery = `
+    DELETE FROM p_pa
+    WHERE pa_id = ANY($1)
+    AND stock = 0
+    RETURNING pa_id;`;
+
+    const { rows: removedIds } = await db.query<OutPallet>(productsQuery, [
+      paIds,
+    ]);
+
+    if (!removedIds.length) return;
+    const uniqueIds = new Set(removedIds.map((row) => row.pa_id));
+
+    const palletQuery = `
+    DELETE FROM pallets p
+    WHERE p.pa_id = ANY($1)
+    AND NOT EXISTS (SELECT 1 FROM p_pa WHERE pa_id = p.pa_id);`;
+
+    await db.query(palletQuery, [Array.from(uniqueIds)]);
   }
 
   async addProduct(p_id: number, stock: number) {
@@ -94,13 +127,13 @@ export class ProductPallet extends Pallet {
     if (this.products.has(p_id))
       // product already on pallet => update existing row
       await GeneralModel.update(
-        ProductPallet.ProductTable,
+        "p_pa",
         { stock: newStock },
         { pa_id: this.pa_id, p_id },
       );
     else
       // create new row for product
-      await GeneralModel.create(ProductPallet.ProductTable, {
+      await GeneralModel.create("p_pa", {
         stock,
         pa_id: this.pa_id,
         p_id,

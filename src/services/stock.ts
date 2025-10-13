@@ -8,7 +8,10 @@ export async function removeFromStorage(products: Map<number, number>) {
     throw new Error(`Not Enough Stock: ${JSON.stringify(missing)}`);
 
   // remove stock from storage pallets
-  await ProductPallet.removeProducts(data);
+  const paIds = await ProductPallet.removeProducts(data);
+  // remove empty storage pallets
+  // locations.pa_id automatically set to null through SET NULL
+  await ProductPallet.removeEmpty(paIds);
 }
 
 export async function getProductInfo(products: Map<number, number>) {

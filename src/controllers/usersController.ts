@@ -1,12 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
-import User, { VerifyUser } from "../models/usersModel.ts";
+import User, { InUser, VerifyUser } from "../models/usersModel.ts";
 import {
   checkValidation,
   validateAlphaNum,
   validateInt,
 } from "../middlewares/validate.ts";
 import { body, matchedData } from "express-validator";
-import { T_IN, USER_TYPES } from "../config/tableTypes.ts";
 import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
 import getFormLocals from "../getLocals/getFormLocals.ts";
 import getUserLocals from "../getLocals/getUserLocals.ts";
@@ -61,10 +60,10 @@ export const usersNewPost = [
   validateAlphaNum("u_name"),
   validateAlphaNum("username"),
   validateAlphaNum("u_role"),
-  body("u_role").isIn(USER_TYPES),
+  body("u_role").isIn(["admin", "intake", "picker", "outgoing"]),
   checkValidation,
   async (req: Request, res: Response) => {
-    const userData = matchedData<T_IN["USERS"]>(req);
+    const userData = matchedData<InUser>(req);
     await VerifyUser.create(userData);
     res.redirect(`/users`);
   },

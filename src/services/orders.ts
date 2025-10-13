@@ -1,11 +1,10 @@
-import { OrderType, T_IN, TASK_TYPES } from "../config/tableTypes.ts";
 import Location from "../models/locationsModel.ts";
-import Order, { ProductOrder } from "../models/ordersModel.ts";
+import Order, { OrderType, ProductOrder } from "../models/ordersModel.ts";
 import Pallet, { ProductPallet } from "../models/palletsModel.ts";
 import { FullTask } from "../models/tasksModel.ts";
 
 export async function createOrder(
-  o_type: T_IN["ORDERS"]["o_type"],
+  o_type: OrderType,
   products: number[],
   stock: number[],
 ) {
@@ -13,8 +12,7 @@ export async function createOrder(
 
   // assign new task to new order
   const order = await ProductOrder.create(
-    { o_type },
-    task.t_id,
+    { o_type, t_id: task.t_id },
     products,
     stock,
   );
@@ -23,7 +21,7 @@ export async function createOrder(
 
 async function createFirstTask(o_type: OrderType) {
   // get corresponding task type for order type
-  const t_type = o_type === "IN" ? TASK_TYPES[0] : TASK_TYPES[3];
+  const t_type = o_type === "IN" ? "arrival" : "pick";
 
   // create new pallet and assign to new task
   const pallet = await Pallet.create();

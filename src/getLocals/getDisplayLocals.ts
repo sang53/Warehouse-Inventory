@@ -1,8 +1,6 @@
-import { T_OUT } from "../config/tableTypes.ts";
-
 interface DisplayLocals {
   title: string;
-  tableData: Partial<T_OUT[keyof T_OUT]>[];
+  tableData: object[];
 }
 
 export default function (tables: DisplayLocals[]) {

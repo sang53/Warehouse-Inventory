@@ -1,16 +1,3 @@
-export const TNAMES = {
-  PRODUCTS: "products",
-  PALLETS: "pallets",
-  LOCATIONS: "locations",
-  P_PA: "p_pa",
-  TASKS: "tasks",
-  ORDERS: "orders",
-  O_P: "o_p",
-  O_T: "o_t",
-  USERS: "users",
-  TASKREL: "taskRels",
-} as const;
-
 const TABLETYPES = {
   location_type: `CREATE TYPE location_type AS ENUM ('intake', 'storage', 'outgoing');`,
   task_type: `CREATE TYPE task_type AS ENUM ('arrival', 'intake', 'storage', 'pick', 'outgoing', 'export');`,
@@ -29,12 +16,12 @@ const TABLESCHEMAS = {
   locations: `CREATE TABLE locations (
     l_id SERIAL PRIMARY KEY,
     l_name TEXT UNIQUE NOT NULL,
-    pa_id INT UNIQUE REFERENCES pallets(pa_id),
+    pa_id INT UNIQUE REFERENCES pallets(pa_id) ON DELETE SET NULL,
     l_role location_type NOT NULL
 );`,
   p_pa: `CREATE TABLE p_pa (
     p_id INT NOT NULL REFERENCES products(p_id),
-    pa_id INT NOT NULL REFERENCES pallets(pa_id),
+    pa_id INT NOT NULL REFERENCES pallets(pa_id) ON DELETE CASCADE,
     stock INT NOT NULL CHECK (stock >= 0),
     PRIMARY KEY (p_id, pa_id)
 );`,

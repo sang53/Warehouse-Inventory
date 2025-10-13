@@ -1,18 +1,24 @@
-import { TNAMES } from "../config/tableSchema.ts";
-import { LocationType, T_IN, T_OUT } from "../config/tableTypes.ts";
 import GeneralModel from "./generalModel.ts";
 import db from "../config/pool.ts";
 
-const TableName = "LOCATIONS" as const;
-type Input = T_IN[typeof TableName];
-type Output = T_OUT[typeof TableName];
+export interface InLocation {
+  l_name: string;
+  l_role: LocationType;
+}
 
-export interface LocationData {
-  l_name: LocationType;
+export interface OutLocation extends InLocation {
+  l_id: number;
+  pa_id: number | null;
+}
+
+interface LocationData {
+  l_name: string;
   p_id: number;
   stock: number;
   pa_id: number;
 }
+
+type LocationType = "intake" | "storage" | "outgoing";
 
 export default class Location {
   l_id: number;
@@ -20,22 +26,20 @@ export default class Location {
   pa_id: number | null;
   l_role: LocationType;
 
-  static table = TableName;
-
-  constructor(data: Output) {
+  constructor(data: OutLocation) {
     this.l_id = data.l_id;
     this.l_name = data.l_name;
     this.pa_id = data.pa_id;
     this.l_role = data.l_role;
   }
 
-  static async create(data: Input) {
-    const output = await GeneralModel.create(this.table, data);
+  static async create(data: InLocation) {
+    const output = await GeneralModel.create("locations", data);
     return new Location(output);
   }
 
-  static async get(data: Partial<Output>, limit?: number | null) {
-    const output = await GeneralModel.get(this.table, {
+  static async get(data: Partial<OutLocation>, limit?: number | null) {
+    const output = await GeneralModel.get("locations", {
       conditions: data,
       limit,
     });
@@ -44,12 +48,15 @@ export default class Location {
   }
 
   static async getAll() {
-    const output = await GeneralModel.get(this.table, { limit: null });
+    const output = await GeneralModel.get("locations", { limit: null });
     return output.map((location) => new Location(location));
   }
 
-  static async #update(data: Partial<Output>, conditions?: Partial<Output>) {
-    const output = await GeneralModel.update(this.table, data, conditions);
+  static async #update(
+    data: Partial<OutLocation>,
+    conditions?: Partial<OutLocation>,
+  ) {
+    const output = await GeneralModel.update("locations", data, conditions);
     return output.map((location) => new Location(location));
   }
 
@@ -57,12 +64,12 @@ export default class Location {
     // query to find empty locations
     // selects locations of l_role with no current pallet
     // excludes locations that have a uncompleted task associated with the location
-    const query = `SELECT a.l_id FROM ${TNAMES[TableName]} a 
+    const query = `SELECT a.l_id FROM locations a 
       WHERE a.l_role = $1
       AND a.pa_id IS NULL
       AND NOT EXISTS (
-        SELECT 1 FROM ${TNAMES["TASKS"]} b
-        JOIN ${TNAMES["TASKREL"]} c
+        SELECT 1 FROM tasksb
+        JOIN taskRels c
         ON b.t_id = c.t_id
         WHERE a.l_id = c.l_id 
         AND b.completed IS NULL

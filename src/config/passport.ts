@@ -8,13 +8,11 @@ passport.use(
     void (async () => {
       try {
         const user = await User.getAuthUser(username);
-        if (!(await argon2.verify(user.password, password))) {
+        if (!(await argon2.verify(user.password, password)))
           done(null, false, {
             message: "Incorrect Username or Password",
           });
-          return;
-        }
-        done(null, user);
+        else done(null, user);
       } catch (error) {
         done(error as Error);
       }
