@@ -47,27 +47,10 @@ function getExcludedKeys(
   );
 }
 
-const ID_FIELD = {
-  type: "number",
-  min: "0",
-  step: "1",
-  required: true,
-  autofocus: true,
-} as const;
-
 const NAME_FIELD = {
   type: "text",
   required: true,
   placeholder: "Must be unique",
-} as const;
-
-const STOCK_FIELD = {
-  text: "Quantity",
-  name: "stock",
-  type: "number",
-  step: "1",
-  min: "1",
-  required: true,
 } as const;
 
 const formFields = {
@@ -103,13 +86,5 @@ const formFields = {
       ...NAME_FIELD,
       placeholder: "intake | storage | outgoing",
     },
-  ],
-  ORDERS: [
-    {
-      text: "Product ID",
-      name: "p_id",
-      ...ID_FIELD,
-    },
-    STOCK_FIELD,
   ],
 } as const;

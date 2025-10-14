@@ -1,5 +1,4 @@
-Redo orders form to provide products[] and stocks[]
-Update code to be more atomic for race conditions
+Update code to be more atomic for race conditions & errors
 Add comments
 Change DB scripts => move associated .ts files into 1
 Make DB scripts to add initial data to database

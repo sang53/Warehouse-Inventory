@@ -8,7 +8,6 @@ import {
 } from "../middlewares/validate.ts";
 import { matchedData } from "express-validator";
 import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
-import getFormLocals from "../getLocals/getFormLocals.ts";
 import { createOrder } from "../services/orders.ts";
 import mapToView from "../utils/mapToView.ts";
 
@@ -34,13 +33,8 @@ export const ordersGet = [
 ];
 
 export const ordersNewGet = [
-  (_req: Request, res: Response, next: NextFunction) => {
-    res.locals = getFormLocals({
-      title: "New Order",
-      action: "/orders/new",
-      field: "ORDERS",
-    });
-    next();
+  (_req: Request, res: Response) => {
+    res.render("orderForm");
   },
 ];
 
