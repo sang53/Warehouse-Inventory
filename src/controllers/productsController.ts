@@ -6,7 +6,6 @@ import {
   validateAlphaNum,
   validateInt,
 } from "../middlewares/validate.ts";
-import { T_IN } from "../config/tableTypes.ts";
 import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
 import getFormLocals from "../getLocals/getFormLocals.ts";
 import { ensureRole } from "../middlewares/authenticate.ts";

@@ -1,10 +1,12 @@
+import { PoolClient } from "pg";
 import Location from "../models/locationsModel.ts";
 import Order, { ProductOrder } from "../models/ordersModel.ts";
 import { ProductPallet } from "../models/palletsModel.ts";
 import Task, { FullTask, OutTaskRel, TaskType } from "../models/tasksModel.ts";
 import User, { UserType } from "../models/usersModel.ts";
 import { completeOrder } from "./orders.ts";
-import { removeFromStorage } from "./stock.ts";
+import { mapToProductStock, removeFromStorage } from "./stock.ts";
+import transaction from "../utils/transaction.ts";
 
 const LTYPEMAP = {
   arrival: "intake",
@@ -30,46 +32,57 @@ export async function getCurrentTask(user: User, start: boolean = true) {
     admin: [],
   } as const;
 
-  // find oldest corresponding task
   const task = await Task.getNewByTypes(USER_TASK_MAP[user.u_role]);
   if (!task) return null;
-  // set up and start task
-  return await startTask(task, user);
+
+  return await transaction(startTask, { task, user });
 }
 
-async function startTask(task: Task, user: User) {
+async function startTask(
+  client: PoolClient,
+  { task, user }: { task: Task; user: User },
+) {
   const taskRels: Partial<OutTaskRel> = { u_id: user.u_id };
 
-  // overwrite current location w/ new location
   if (needsLocation(task.t_type))
+    // overwrite current location w/ new location
     taskRels.l_id = await Location.getEmpty(LTYPEMAP[task.t_type]);
 
-  // save data & start timestamp
-  const fullTask = await task.updateRels(taskRels);
-  return await fullTask.setStart();
+  // save task rels & start timestamp in transaction
+  const fullTask = await task.updateRels(taskRels, client);
+  return await fullTask.setStart(true, client);
 }
 
 export async function completeTask(task: FullTask) {
-  const order = await Order.getByTask(task.t_id);
-  if (needsPallet(task.t_type)) {
-    const [pallet, fullOrder] = await Promise.all([
-      ProductPallet.get({ pa_id: task.pa_id }),
-      ProductOrder.getProducts(order),
-    ]);
-
-    // remove products from storage if picking task
-    if (task.t_type === "pick") await removeFromStorage(fullOrder.products);
-
-    // add products to pallet
-    await pallet.addProductsMap(fullOrder.products);
-  } else if (needsLocation(task.t_type))
-    // move pallet to new location
-    await Location.movePallet(task.pa_id, task.l_id);
-
-  await Promise.all([task.complete(), nextTask(task, order)]);
+  await transaction(internalCompleteTask, task);
 }
 
-export async function nextTask(task: FullTask, order: Order) {
+async function internalCompleteTask(client: PoolClient, task: FullTask) {
+  const order = await Order.getByTask(task.t_id);
+
+  if (needsPallet(task.t_type)) {
+    const fullOrder = await ProductOrder.getProducts(order);
+
+    // remove products from storage if picking task
+    if (task.t_type === "pick")
+      await removeFromStorage(fullOrder.products, client);
+
+    // add products to pallet
+    const productStocks = mapToProductStock(fullOrder.products, task.pa_id);
+    await ProductPallet.modifyProducts(productStocks, client, "+");
+  } else if (needsLocation(task.t_type))
+    // if pallet was moved new location:
+    // remove pallet from old location & move pallet to new location
+    await Location.movePallet(task.pa_id, task.l_id, client);
+
+  await Promise.all([task.complete(client), nextTask(task, order, client)]);
+}
+
+export async function nextTask(
+  task: FullTask,
+  order: Order,
+  client: PoolClient,
+) {
   const END_ORDER_MAP = {
     IN: "storage",
     OUT: "export",
@@ -77,17 +90,18 @@ export async function nextTask(task: FullTask, order: Order) {
 
   if (task.t_type === END_ORDER_MAP[order.o_type])
     // case: last task for order
-    return await completeOrder(task, order);
+    return await completeOrder(task, order, client);
 
   // generate next task & add carryover rels
   const newTask = await FullTask.create(
+    client,
     {
       t_type: iterateTaskType(task.t_type),
     },
     task.pa_id,
-    { l_id: task.l_id },
+    { l_id: task.l_id }, // default: keep pallet at same location
   );
-  await order.addTask(newTask.t_id);
+  await order.addTask(newTask.t_id, client);
   return newTask;
 }
 
@@ -104,7 +118,7 @@ function iterateTaskType(t_type: TaskType) {
   const idx = TASK_TYPES.findIndex((value) => value === t_type);
   const newTType = TASK_TYPES[idx + 1];
 
-  if (!newTType) throw new Error("System Error"); // for TS error
+  if (!newTType) throw new Error("System Error"); // uneeded check for TS
   return newTType;
 }
 

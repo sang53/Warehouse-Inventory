@@ -27,7 +27,7 @@ export function renderErrorPage(
   res: Response,
   _next: NextFunction,
 ) {
-  res.render("errorPage", {
+  res.status(401).render("errorPage", {
     errors,
   });
 }

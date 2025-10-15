@@ -7,14 +7,21 @@ passport.use(
   new LocalStrategy((username, password, done) => {
     void (async () => {
       try {
-        const user = await User.getAuthUser(username);
-        if (!(await argon2.verify(user.password, password)))
+        const [user] = await User.getAuthUser(username);
+
+        if (!user) {
+          // user not found
+          done(null, false, { message: "Incorrect Username" });
+          return;
+        }
+
+        if (await argon2.verify(user.password, password)) done(null, user);
+        else
           done(null, false, {
-            message: "Incorrect Username or Password",
+            message: "Incorrect Password",
           });
-        else done(null, user);
-      } catch (error) {
-        done(error as Error);
+      } catch (err) {
+        done(err);
       }
     })();
   }),
@@ -28,9 +35,13 @@ passport.deserializeUser((user: number, done) => {
   void (async () => {
     try {
       const [userObj] = await User.get({ u_id: user });
-      done(null, userObj);
-    } catch (error) {
-      done(error as Error);
+
+      if (!userObj)
+        // missing user
+        done(null, false);
+      else done(null, userObj);
+    } catch (err) {
+      done(err);
     }
   })();
 });

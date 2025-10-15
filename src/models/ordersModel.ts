@@ -1,5 +1,6 @@
 import GeneralModel from "./generalModel.ts";
 import db from "../config/pool.ts";
+import { PoolClient } from "pg";
 
 export interface InOrder {
   o_type: OrderType;
@@ -79,11 +80,15 @@ export default class Order {
     return output.rows.map((order) => new Order(order));
   }
 
-  async addTask(t_id: number) {
-    const output = await GeneralModel.create("o_t", {
-      o_id: this.o_id,
-      t_id,
-    });
+  async addTask(t_id: number, client: PoolClient) {
+    const output = await GeneralModel.create(
+      "o_t",
+      {
+        o_id: this.o_id,
+        t_id,
+      },
+      client,
+    );
     this.t_id = output.t_id;
     return this;
   }
@@ -121,9 +126,10 @@ export class ProductOrder extends Order {
     { o_type, t_id }: InOrder,
     products: number[],
     stock: number[],
+    client: PoolClient,
   ) {
     // create order in DB
-    const output = await GeneralModel.create("orders", { o_type });
+    const output = await GeneralModel.create("orders", { o_type }, client);
     const order = new ProductOrder({ ...output, t_id }, products, stock);
 
     // add products/stocks & first task
@@ -142,7 +148,10 @@ export class ProductOrder extends Order {
       INSERT INTO o_p (o_id, p_id, stock)
       VALUES ${placeholders};`;
 
-    await Promise.all([db.query(query, values), order.addTask(t_id)]);
+    await Promise.all([
+      client.query(query, values),
+      order.addTask(t_id, client),
+    ]);
 
     // create products map
     order.products = new Map(

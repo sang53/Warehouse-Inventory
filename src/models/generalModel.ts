@@ -124,9 +124,11 @@ export default (function () {
     table: TName,
     data: Partial<TableOutputs[TName]>,
     conditions?: Partial<TableOutputs[TName]>,
+    client?: PoolClient,
   ) {
+    const connection = client ?? db;
     const dataPlaceholder = Object.keys(data).length;
-    const output = await db.query<TableOutputs[TName]>(
+    const output = await connection.query<TableOutputs[TName]>(
       `UPDATE ${table} SET ${getColumnNames(data)} = ${getPlaceholders(dataPlaceholder)}
       ${getConditionals(dataPlaceholder + 1, conditions)} RETURNING *;`,
       Object.values(data).concat(getValues(conditions)),
@@ -137,10 +139,12 @@ export default (function () {
   async function remove<TName extends TableNames>(
     table: TName,
     conditions: Partial<TableOutputs[TName]>,
+    client?: PoolClient,
   ) {
+    const connection = client ?? db;
     const query = `DELETE FROM ${table}
     ${getConditionals(1, conditions)};`;
-    await db.query(query, getValues(conditions));
+    await connection.query(query, getValues(conditions));
   }
 
   async function timestamp<
@@ -151,8 +155,10 @@ export default (function () {
     column: TCol,
     conditions: Partial<TableOutputs[TName]>,
     value: boolean,
+    connection?: PoolClient,
   ) {
-    const output = await db.query<Pick<TableOutputs[TName], TCol>>(
+    const client = connection ?? db;
+    const output = await client.query<Pick<TableOutputs[TName], TCol>>(
       `UPDATE ${table} SET ${String(column)} = ${value ? "NOW()" : "NULL"}
       ${getConditionals(1, conditions)} RETURNING ${String(column)};`,
       getValues(conditions),

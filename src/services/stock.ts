@@ -1,17 +1,21 @@
+import { PoolClient } from "pg";
 import Location from "../models/locationsModel.ts";
 import { ProductPallet } from "../models/palletsModel.ts";
 
-export async function removeFromStorage(products: Map<number, number>) {
+export async function removeFromStorage(
+  products: Map<number, number>,
+  client: PoolClient,
+) {
   const { data, missing } = await getProductInfo(products);
   // Handle case of not enough stock
   if (missing.length)
     throw new Error(`Not Enough Stock: ${JSON.stringify(missing)}`);
 
   // remove stock from storage pallets
-  const paIds = await ProductPallet.removeProducts(data);
+  const paIds = await ProductPallet.modifyProducts(data, client, "-");
   // remove empty storage pallets
   // locations.pa_id automatically set to null through SET NULL
-  await ProductPallet.removeEmpty(paIds);
+  await ProductPallet.removeEmpty(paIds, client);
 }
 
 export async function getProductInfo(products: Map<number, number>) {
@@ -46,6 +50,16 @@ export async function getProductInfo(products: Map<number, number>) {
   });
 
   // get products with not enough stock
-  const missing = Array.from(remainder.entries());
+  const missing = Array.from(remainder.keys());
   return { data, missing };
+}
+
+export function mapToProductStock(map: Map<number, number>, pa_id: number) {
+  const output = [];
+
+  for (const [p_id, stock] of map) {
+    output.push({ pa_id, p_id, stock });
+  }
+
+  return output;
 }

@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import User, { InUser, VerifyUser } from "../models/usersModel.ts";
+import User, { InUser } from "../models/usersModel.ts";
 import {
   checkValidation,
   validateAlphaNum,
@@ -33,6 +33,7 @@ export const usersIDGet = [
 
     // retrieve user from database
     const [user] = await User.get({ u_id: id });
+    if (!user) throw new Error(`User ${String(id)} Not Found`);
 
     // retrieve current task
     const task = await getCurrentTask(user);
@@ -64,7 +65,7 @@ export const usersNewPost = [
   checkValidation,
   async (req: Request, res: Response) => {
     const userData = matchedData<InUser>(req);
-    await VerifyUser.create(userData);
+    await User.create(userData);
     res.redirect(`/users`);
   },
 ];

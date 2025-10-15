@@ -58,9 +58,9 @@ const TABLESCHEMAS = {
 );`,
   taskRels: `CREATE TABLE taskRels (
     t_id INT PRIMARY KEY REFERENCES tasks(t_id),
-    l_id INT REFERENCES locations(l_id),
-    pa_id INT REFERENCES pallets(pa_id),
-    u_id INT REFERENCES users(u_id)
+    l_id INT UNIQUE REFERENCES locations(l_id),
+    pa_id INT UNIQUE REFERENCES pallets(pa_id),
+    u_id INT UNIQUE REFERENCES users(u_id)
 );`,
 };
 

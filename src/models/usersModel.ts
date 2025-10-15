@@ -29,8 +29,7 @@ export default class User {
       conditions: data,
       limit,
     });
-    const users = output.map((user) => new User(user));
-    return GeneralModel.parseOutput(users, "User Not Found");
+    return output.map((user) => new User(user));
   }
 
   static async getAll() {
@@ -44,23 +43,10 @@ export default class User {
   }
 
   static async getAuthUser(username: string) {
-    const output = await GeneralModel.get("users", {
+    return await GeneralModel.get("users", {
       conditions: { username },
       limit: 1,
     });
-    const [user] = GeneralModel.parseOutput(output, "User Not Found");
-    return new VerifyUser(user);
-  }
-}
-
-export class VerifyUser extends User {
-  username: string;
-  password: string;
-
-  constructor(data: OutUser) {
-    super(data);
-    this.username = data.username;
-    this.password = data.password;
   }
 
   static async create(data: InUser) {

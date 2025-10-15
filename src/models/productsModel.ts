@@ -36,7 +36,7 @@ export default class Product {
       limit,
     });
     const products = output.map((product) => new Product(product));
-    return GeneralModel.parseOutProduct(products, "Product Not Found");
+    return GeneralModel.parseOutput(products, "Product Not Found");
   }
 
   static async getAll() {

@@ -1,5 +1,6 @@
 import GeneralModel from "./generalModel.ts";
 import db from "../config/pool.ts";
+import { PoolClient } from "pg";
 
 export interface InLocation {
   l_name: string;
@@ -54,9 +55,15 @@ export default class Location {
 
   static async #update(
     data: Partial<OutLocation>,
-    conditions?: Partial<OutLocation>,
+    conditions: Partial<OutLocation>,
+    client?: PoolClient,
   ) {
-    const output = await GeneralModel.update("locations", data, conditions);
+    const output = await GeneralModel.update(
+      "locations",
+      data,
+      conditions,
+      client,
+    );
     return output.map((location) => new Location(location));
   }
 
@@ -84,9 +91,13 @@ export default class Location {
     return location.l_id;
   }
 
-  static async movePallet(pa_id: number, l_id?: number | null) {
-    await Location.#update({ pa_id: null }, { pa_id });
-    if (l_id) await Location.#update({ pa_id }, { l_id });
+  static async movePallet(
+    pa_id: number,
+    l_id: number | null,
+    client?: PoolClient,
+  ) {
+    await Location.#update({ pa_id: null }, { pa_id }, client);
+    if (l_id) await Location.#update({ pa_id }, { l_id }, client);
   }
 
   static async getByProducts(products: Map<number, number>) {

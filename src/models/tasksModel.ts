@@ -1,5 +1,6 @@
 import GeneralModel from "./generalModel.ts";
 import db from "../config/pool.ts";
+import { PoolClient } from "pg";
 
 export interface InTask {
   t_type: TaskType;
@@ -64,6 +65,7 @@ export default class Task {
     return output.map((task) => new Task(task));
   }
 
+  // returns a new task by array of t_types
   static async getNewByTypes(types: TaskType[]) {
     const [task] = await GeneralModel.getArray("tasks", "t_type", types, {
       order: ["placed"],
@@ -73,21 +75,48 @@ export default class Task {
     return new Task(task);
   }
 
-  async setStart(value: boolean = true) {
-    if ((this.started && value) || (!this.started && !value))
-      throw new Error(`Task ${String(this.t_id)} already started`);
-    await this.#timestamp("started", value);
+  async setStart(value: boolean, client?: PoolClient) {
+    if (Boolean(this.started) === value) {
+      // throw error if task already started/cancelled
+      console.error(
+        `Task ${String(this.t_id)} setting .start ${String(value)}`,
+      );
+      throw new Error("System Error");
+    }
+
+    await this.#timestamp("started", value, client);
     return this;
   }
 
-  async complete() {
-    if (this.completed)
-      throw new Error(`Task ${String(this.t_id)} already completed`);
-    await this.#timestamp("completed");
+  async complete(client: PoolClient) {
+    if (this.completed) {
+      // throw error if task already completed
+      console.error(`Task ${String(this.t_id)} setting .complete`);
+      throw new Error("System Error");
+    }
+
+    await this.#timestamp("completed", true, client);
     return this;
   }
 
-  async #timestamp(column: "started" | "completed", value: boolean = true) {
+  async updateRels(data: Partial<OutTaskRel>, client?: PoolClient) {
+    const [rels] = await GeneralModel.update(
+      "taskRels",
+      data,
+      {
+        t_id: this.t_id,
+      },
+      client,
+    );
+    return Object.assign(this, rels);
+  }
+
+  // sets/removes timestamp for given column
+  async #timestamp(
+    column: "started" | "completed",
+    value: boolean,
+    client?: PoolClient,
+  ) {
     this[column] = await GeneralModel.timestamp(
       "tasks",
       column,
@@ -95,14 +124,8 @@ export default class Task {
         t_id: this.t_id,
       },
       value,
+      client,
     );
-  }
-
-  async updateRels(data: Partial<OutTaskRel>) {
-    const [rels] = await GeneralModel.update("taskRels", data, {
-      t_id: this.t_id,
-    });
-    return Object.assign(this, rels);
   }
 }
 
@@ -123,16 +146,21 @@ export class FullTask extends Task {
   }
 
   static async create(
+    client: PoolClient,
     data: InTask,
     pa_id: number,
     rels?: { u_id?: number | null; l_id?: number | null },
   ) {
-    const output = await GeneralModel.create("tasks", data);
-    const relsOutput = await GeneralModel.create("taskRels", {
-      ...rels,
-      pa_id,
-      t_id: output.t_id,
-    });
+    const output = await GeneralModel.create("tasks", data, client);
+    const relsOutput = await GeneralModel.create(
+      "taskRels",
+      {
+        ...rels,
+        pa_id,
+        t_id: output.t_id,
+      },
+      client,
+    );
     return new FullTask(output, relsOutput);
   }
 
