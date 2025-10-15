@@ -1,5 +1,6 @@
 import GeneralModel from "./generalModel.ts";
 import db from "../config/pool.ts";
+import { PoolClient } from "pg";
 
 export interface OutPallet {
   pa_id: number;
@@ -67,46 +68,19 @@ export class ProductPallet extends Pallet {
     return new ProductPallet({ pa_id: data.pa_id }, output);
   }
 
-  static async removeProducts(data: (ProductStock & OutPallet)[]) {
-    const values = data
-      .map(
-        (_, i) =>
-          `($${String(i * 3 + 1)}::int, $${String(i * 3 + 2)}::int, $${String(i * 3 + 3)}::int)`,
-      )
-      .join(", ");
-
-    const query = `
-    UPDATE p_pa AS target
-    SET stock = target.stock - v.stock
-    FROM (
-      VALUES ${values}
-    ) AS v(p_id, pa_id, stock)
-    WHERE target.p_id = v.p_id
-      AND target.pa_id = v.pa_id
-    RETURNING target.pa_id;`;
-
-    const params = data.flatMap(({ p_id, pa_id, stock }) => [
-      p_id,
-      pa_id,
-      stock,
-    ]);
-    const { rows: paIds } = await db.query<OutPallet>(query, params);
-    return paIds.map(({ pa_id }) => pa_id);
-  }
-
-  static async removePallet(pa_id: number) {
+  static async removePallet(pa_id: number, client: PoolClient) {
     // rows from p_pa deleted automatically through cascade
-    await GeneralModel.remove("pallets", { pa_id });
+    await GeneralModel.remove("pallets", { pa_id }, client);
   }
 
-  static async removeEmpty(paIds: number[]) {
+  static async removeEmpty(paIds: number[], client: PoolClient) {
     const productsQuery = `
     DELETE FROM p_pa
     WHERE pa_id = ANY($1)
     AND stock = 0
     RETURNING pa_id;`;
 
-    const { rows: removedIds } = await db.query<OutPallet>(productsQuery, [
+    const { rows: removedIds } = await client.query<OutPallet>(productsQuery, [
       paIds,
     ]);
 
@@ -143,11 +117,31 @@ export class ProductPallet extends Pallet {
     return this;
   }
 
-  async addProductsMap(products: Map<number, number>) {
-    await Promise.allSettled(
-      Array.from(products).map(([p_id, stock]) => {
-        return this.addProduct(p_id, stock);
-      }),
-    );
+  static async modifyProducts(
+    productData: (ProductStock & OutPallet)[],
+    client: PoolClient,
+    operator: "+" | "-",
+  ) {
+    const placeholders = productData
+      .map((_, idx) => {
+        return `($${String(idx * 3 + 1)}, $${String(idx * 3 + 2)}, $${String(idx * 3 + 3)})`;
+      })
+      .join(", ");
+
+    const values = productData.flatMap(({ p_id, pa_id, stock }) => [
+      p_id,
+      pa_id,
+      stock,
+    ]);
+
+    const query = `
+    INSERT INTO p_pa (p_id, pa_id, stock)
+    VALUES ${placeholders}
+    ON CONFLICT (p_id, pa_id)
+    DO UPDATE SET stock = p_pa.stock ${operator} EXCLUDED.stock
+    RETURNING p_pa.pa_id;`;
+
+    const { rows } = await client.query<{ pa_id: number }>(query, values);
+    return rows.map(({ pa_id }) => pa_id);
   }
 }

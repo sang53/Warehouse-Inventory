@@ -122,21 +122,35 @@ export class ProductOrder extends Order {
     products: number[],
     stock: number[],
   ) {
-    await this.#validateProducts(products);
+    // create order in DB
     const output = await GeneralModel.create("orders", { o_type });
     const order = new ProductOrder({ ...output, t_id }, products, stock);
-    await Promise.allSettled([
-      ...products.map((p_id, idx) => {
-        if (stock[idx])
-          return GeneralModel.create("o_p", {
-            o_id: order.o_id,
-            p_id,
-            stock: stock[idx],
-          });
-        else return null;
+
+    // add products/stocks & first task
+    const placeholders = products
+      .map((_, idx) => {
+        return `($${String(idx * 3 + 1)}, $${String(idx * 3 + 2)}, $${String(idx * 3 + 3)})`;
+      })
+      .join(", ");
+
+    const values = products.flatMap((p_id, idx) => {
+      if (!stock[idx]) throw new Error(`Invalid Number of Products/Stocks`);
+      return [order.o_id, p_id, stock[idx]];
+    });
+
+    const query = `
+      INSERT INTO o_p (o_id, p_id, stock)
+      VALUES ${placeholders};`;
+
+    await Promise.all([db.query(query, values), order.addTask(t_id)]);
+
+    // create products map
+    order.products = new Map(
+      products.map((p_id, idx) => {
+        if (!stock[idx]) throw new Error("System Error");
+        return [p_id, stock[idx]];
       }),
-      order.addTask(t_id),
-    ]);
+    );
     return order;
   }
 
@@ -151,20 +165,11 @@ export class ProductOrder extends Order {
     );
   }
 
-  static async #validateProducts(products: number[]) {
+  static async validateProducts(products: number[]) {
     // make sure all p_ids are in DB
-    const DBproducts = await GeneralModel.getArray(
-      "products",
-      "p_id",
-      products,
-      {
-        limit: null,
-      },
-    );
-    const ValidProducts = new Set(DBproducts.map((product) => product.p_id));
-    const invalidProducts = products.filter((p_id) => !ValidProducts.has(p_id));
-    if (invalidProducts.length)
-      throw new Error(`Invalid Product ID/s: ${String(invalidProducts)}`);
+    return await GeneralModel.getArray("products", "p_id", products, {
+      limit: null,
+    });
   }
 
   static async #queryProducts(o_id: number) {
