@@ -1,11 +1,11 @@
 import tableSchema from "../../config/tableSchema.ts";
 import db from "../../config/pool.ts";
 
-async function createTypes() {
+export async function createTables() {
   const client = await db.connect();
   try {
     await client.query("BEGIN");
-    for (const initQuery of Object.values(tableSchema.TYPES)) {
+    for (const initQuery of Object.values(tableSchema.TABLES)) {
       await client.query(initQuery);
     }
     await client.query("COMMIT");
@@ -16,5 +16,3 @@ async function createTypes() {
     client.release();
   }
 }
-
-await createTypes();

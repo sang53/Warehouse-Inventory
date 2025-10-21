@@ -1,7 +1,9 @@
 import db from "../../config/pool.ts";
-import { TNAMES } from "../../config/tableSchema.ts";
+import tableSchema from "../../config/tableSchema.ts";
 
-async function resetTables() {
+const TNAMES = Object.keys(tableSchema.TABLES);
+
+export async function resetTables() {
   const client = await db.connect();
   try {
     await client.query("BEGIN");
@@ -14,5 +16,3 @@ async function resetTables() {
     client.release();
   }
 }
-
-await resetTables();

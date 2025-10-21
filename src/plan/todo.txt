@@ -1,5 +1,5 @@
-Add comments
-Change DB scripts => move associated .ts files into 1
+Test & Bugfix
 Make DB scripts to add initial data to database
 Test & Bugfix
 Add styling
+Add comments
