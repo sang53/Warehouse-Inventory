@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import passport from "passport";
 import { AuthenticatedRequest } from "../middlewares/authenticate.ts";
-import { FullTask } from "../models/tasksModel.ts";
+import { getCurrentTask } from "../services/tasks.ts";
 
 export const loginGet = [
   (req: Request, res: Response) => {
@@ -36,14 +36,12 @@ export const loginPost = [
 
 export const logoutGet = [
   async (req: Request, res: Response) => {
-    try {
-      // unassign task from user if assigned
-      // cancelTask will throw if task not found
-      await FullTask.cancelTask((req as AuthenticatedRequest).user.u_id);
-    } finally {
-      req.logOut(() => {
-        res.redirect("/login");
-      });
-    }
+    const user = (req as AuthenticatedRequest).user;
+    const task = await getCurrentTask(user, false);
+
+    if (task) await task.cancelTask();
+    req.logOut(() => {
+      res.redirect("/login");
+    });
   },
 ];

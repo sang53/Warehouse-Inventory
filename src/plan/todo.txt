@@ -1,5 +1,5 @@
-Test & Bugfix
 Make DB scripts to add initial data to database
+add buttons to functionalities...
 Test & Bugfix
 Add styling
 Add comments

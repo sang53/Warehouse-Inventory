@@ -111,6 +111,14 @@ export default class Task {
     return Object.assign(this, rels);
   }
 
+  async cancelTask() {
+    // Reset started timestamp & remove u_id from rels table
+    await Promise.all([
+      GeneralModel.update("taskRels", { u_id: null }, { t_id: this.t_id }),
+      this.setStart(false),
+    ]);
+  }
+
   // sets/removes timestamp for given column
   async #timestamp(
     column: "started" | "completed",
@@ -207,15 +215,5 @@ export class FullTask extends Task {
     });
     const [rels] = GeneralModel.parseOutput(output);
     return new FullTask(task, rels);
-  }
-
-  static async cancelTask(u_id: number) {
-    const [task] = await FullTask.getByRels({ u_id });
-
-    // Reset started timestamp & remove u_id from rels table
-    await Promise.all([
-      GeneralModel.update("taskRels", { u_id: null }, { u_id }),
-      task.setStart(false),
-    ]);
   }
 }

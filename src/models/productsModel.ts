@@ -52,7 +52,10 @@ export default class Product {
     return output.map((product) => new Product(product));
   }
 
-  static async getAllStock(order: "p_id" | "net_stock", limit: number = 20) {
+  static async getAllStock(
+    order: "sub.p_id" | "net_stock",
+    limit: number = 20,
+  ) {
     const storage_totals = `
     WITH storage_totals as (
     SELECT p.p_id, SUM(pa.stock) as storage
@@ -82,7 +85,7 @@ export default class Product {
       LEFT JOIN storage_totals s ON p.p_id = s.p_id
       LEFT JOIN order_totals o ON p.p_id = o.p_id
     ) AS sub
-    ORDER BY sub.${order}
+    ORDER BY ${order}
     LIMIT ${String(limit)};`;
 
     const { rows } = await db.query<ProductStocks>(

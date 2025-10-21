@@ -6,7 +6,7 @@ interface DisplayLocals {
 export default function (tables: DisplayLocals[]) {
   return {
     view: "display",
-    viewData: tables,
+    viewData: { tables },
   };
 }
 
