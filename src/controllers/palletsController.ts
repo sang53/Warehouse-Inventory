@@ -8,12 +8,15 @@ import Location from "../models/locationsModel.ts";
 
 export const palletsGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
-    res.locals = getDisplayLocals([
-      {
-        title: "All Pallets",
-        tableData: await Pallet.getAll(),
-      },
-    ]);
+    res.locals = getDisplayLocals(
+      [
+        {
+          title: "All Pallets",
+          tableData: await Pallet.getAll(),
+        },
+      ],
+      { searchBar: true },
+    );
     next();
   },
 ];

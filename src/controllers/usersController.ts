@@ -15,12 +15,15 @@ import { ensureRole } from "../middlewares/authenticate.ts";
 export const usersGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
     const users = await User.getAll();
-    res.locals = getDisplayLocals([
-      {
-        title: "All Users",
-        tableData: users,
-      },
-    ]);
+    res.locals = getDisplayLocals(
+      [
+        {
+          title: "All Users",
+          tableData: users,
+        },
+      ],
+      { searchBar: true, addBtn: true },
+    );
     next();
   },
 ];

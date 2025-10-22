@@ -16,16 +16,19 @@ export const productsGet = [
       Product.getAllStock("sub.p_id", 50),
       Product.getAllStock("net_stock"),
     ]);
-    res.locals = getDisplayLocals([
-      {
-        title: "Products by Net Stock",
-        tableData: net,
-      },
-      {
-        title: "All Products",
-        tableData: id,
-      },
-    ]);
+    res.locals = getDisplayLocals(
+      [
+        {
+          title: "Products by Net Stock",
+          tableData: net,
+        },
+        {
+          title: "All Products",
+          tableData: id,
+        },
+      ],
+      { searchBar: true, addBtn: true },
+    );
     next();
   },
 ];

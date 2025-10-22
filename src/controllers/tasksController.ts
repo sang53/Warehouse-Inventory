@@ -18,16 +18,19 @@ export const tasksGet = [
       FullTask.getByComplete(true),
     ]);
 
-    res.locals = getDisplayLocals([
-      {
-        title: "Incomplete Tasks",
-        tableData: incomplete,
-      },
-      {
-        title: "Completed Tasks",
-        tableData: complete,
-      },
-    ]);
+    res.locals = getDisplayLocals(
+      [
+        {
+          title: "Incomplete Tasks",
+          tableData: incomplete,
+        },
+        {
+          title: "Completed Tasks",
+          tableData: complete,
+        },
+      ],
+      { searchBar: true },
+    );
     next();
   },
 ];

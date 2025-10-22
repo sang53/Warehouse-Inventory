@@ -8,9 +8,15 @@ import { FullTask } from "../models/tasksModel.ts";
 
 export const locationsGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
-    res.locals = getDisplayLocals([
-      { title: "All Locations", tableData: await Location.getAll() },
-    ]);
+    res.locals = getDisplayLocals(
+      [
+        {
+          title: "All Locations",
+          tableData: await Location.getAll(),
+        },
+      ],
+      { searchBar: true },
+    );
     next();
   },
 ];

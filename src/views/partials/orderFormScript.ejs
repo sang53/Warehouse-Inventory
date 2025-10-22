@@ -1,0 +1,45 @@
+<script>
+  let curr = 0;
+  const container = document.getElementById("productInputs");
+  const addBtn = document.getElementById("addProductBtn");
+  addBtn.addEventListener("click", addNewInputs);
+
+  // create first product form
+  addNewInputs();
+
+  // create label & inputs for p_id & stock
+  function addNewInputs() {
+    const div = document.createElement("div");
+    div.innerHTML = `
+          <label for="product-${curr}">Product ID</label>
+          <input
+            id="product-${curr}"
+            type="number"
+            name="products[]"
+            placeholder="Product ID"
+            min="1"
+            required
+          />
+          <label for="stock-${curr}">Amount</label>
+          <input
+            id="stock-${curr}"
+            type="number"
+            name="stocks[]"
+            placeholder="Stock"
+            min="1"
+            required
+          />
+          <button type="button" class="removeBtn">Remove</button>
+        `;
+
+    // Add the new pair
+    container.appendChild(div);
+
+    // Add remove button functionality
+    div.querySelector(".removeBtn").addEventListener("click", () => {
+      div.remove();
+    });
+    // iterate number used in ids
+    curr++;
+  }
+</script>

@@ -1,0 +1,20 @@
+<% if (searchBar) { %>
+  <div id="search-bar">
+    <label for="search-bar-input">Search By ID: </label>
+    <input
+      id="search-bar-input"
+      type="number"
+      min="1"
+      required
+      placeholder="ID Number"
+    />
+    <button type="button" id="search-button">Search</button>
+  </div>
+  <script>
+    const input = document.getElementById("search-bar-input");
+    const btn = document.getElementById("search-button");
+    btn.addEventListener("click", () => {
+      window.location.href = `${input.value}`;
+    });
+  </script>
+<% } %>

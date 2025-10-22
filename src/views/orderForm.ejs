@@ -4,44 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Add New Order</title>
-    <script defer>
-      let curr = 0;
-      const container = document.getElementById("productInputs");
-      const addBtn = document.getElementById("addProductBtn");
-
-      addBtn.addEventListener("click", () => {
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <label for="product-${++curr}">Product ID</label>
-          <input
-            id="product-${curr}"
-            type="number"
-            name="products[]"
-            placeholder="Product ID"
-            min="1"
-            required
-          />
-          <label for="stock-${curr}">Amount</label>
-          <input
-            id="stock-${curr}"
-            type="number"
-            name="stocks[]"
-            placeholder="Stock"
-            min="1"
-            required
-          />
-          <button type="button" class="removeBtn">Remove</button>
-        `;
-
-        // Add the new pair
-        container.appendChild(div);
-
-        // Add remove button functionality
-        div.querySelector(".removeBtn").addEventListener("click", () => {
-          div.remove();
-        });
-      });
-    </script>
   </head>
   <body>
     <%- include("partials/header.ejs") %>
@@ -59,31 +21,11 @@
             Outgoing
           </label>
         </fieldset>
-        <div id="productInputs">
-          <div>
-            <label for="product-0">Product ID</label>
-            <input
-              id="product-0"
-              type="number"
-              name="products[]"
-              placeholder="ID"
-              min="1"
-              required
-            />
-            <label for="stock-0">Amount</label>
-            <input
-              id="stock-0"
-              type="number"
-              name="stocks[]"
-              placeholder="Stock"
-              min="1"
-              required
-            />
-          </div>
-        </div>
+        <div id="productInputs"></div>
         <button type="button" id="addProduct">Add another product</button>
         <button type="submit">Submit</button>
       </form>
     </div>
+    <%- include("partials/orderFormScript.ejs") %>
   </body>
 </html>

@@ -3,10 +3,18 @@ interface DisplayLocals {
   tableData: object[];
 }
 
-export default function (tables: DisplayLocals[]) {
+interface DisplayOptions {
+  searchBar?: boolean;
+  addBtn?: boolean;
+}
+
+export default function (
+  tables: DisplayLocals[],
+  { searchBar = false, addBtn = false }: DisplayOptions = {},
+) {
   return {
     view: "display",
-    viewData: { tables },
+    viewData: { tables, searchBar, addBtn },
   };
 }
 

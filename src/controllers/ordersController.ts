@@ -18,16 +18,19 @@ export const ordersGet = [
       Order.getByComplete(true, "OUT"),
     ]);
 
-    res.locals = getDisplayLocals([
-      {
-        title: "Completed Incoming Orders",
-        tableData: incoming,
-      },
-      {
-        title: "Completed Outgoing Orders",
-        tableData: outgoing,
-      },
-    ]);
+    res.locals = getDisplayLocals(
+      [
+        {
+          title: "Completed Incoming Orders",
+          tableData: incoming,
+        },
+        {
+          title: "Completed Outgoing Orders",
+          tableData: outgoing,
+        },
+      ],
+      { searchBar: true, addBtn: true },
+    );
     next();
   },
 ];
