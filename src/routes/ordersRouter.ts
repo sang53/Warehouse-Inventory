@@ -10,7 +10,7 @@ const ordersRouter = Router();
 
 ordersRouter.post("/new", ordersNewPost);
 ordersRouter.get("/new", ordersNewGet);
-ordersRouter.get("/:id", ordersIDGet);
+ordersRouter.get("/id/:id", ordersIDGet);
 ordersRouter.get("/", ordersGet);
 
 export default ordersRouter;

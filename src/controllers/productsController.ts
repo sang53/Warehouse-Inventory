@@ -57,11 +57,12 @@ export const productsNewPost = [
 ];
 
 export const productsIDGet = [
-  ...validateInt("id"),
+  validateInt("id"),
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
     const product = await Product.getStockByProduct(id);
+    console.log(id);
 
     res.locals = getDisplayLocals([
       {

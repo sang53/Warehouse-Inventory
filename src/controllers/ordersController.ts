@@ -65,7 +65,7 @@ export const ordersNewPost = [
 ];
 
 export const ordersIDGet = [
-  ...validateInt("id"),
+  validateInt("id"),
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);

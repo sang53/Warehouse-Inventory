@@ -10,7 +10,7 @@ const productsRouter = Router();
 
 productsRouter.post("/new", productsNewPost);
 productsRouter.get("/new", productsNewGet);
-productsRouter.get("/:id", productsIDGet);
+productsRouter.get("/id/:id", productsIDGet);
 productsRouter.get("/", productsGet);
 
 export default productsRouter;

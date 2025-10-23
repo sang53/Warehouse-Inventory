@@ -10,7 +10,7 @@ const usersRouter = Router();
 
 usersRouter.post("/new", usersNewPost);
 usersRouter.get("/new", usersNewGet);
-usersRouter.get("/:id", usersIDGet);
+usersRouter.get("/id/:id", usersIDGet);
 usersRouter.get("/", usersGet);
 
 export default usersRouter;

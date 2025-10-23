@@ -7,8 +7,8 @@ import {
 
 const tasksRouter = Router();
 
-tasksRouter.post("/:id", tasksIDPost);
-tasksRouter.get("/:id", tasksIDGet);
+tasksRouter.post("/id/:id", tasksIDPost);
+tasksRouter.get("/id/:id", tasksIDGet);
 tasksRouter.get("/", tasksGet);
 
 export default tasksRouter;

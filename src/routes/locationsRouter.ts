@@ -6,7 +6,7 @@ import {
 
 const locationsRouter = Router();
 
-locationsRouter.get("/:id", locationsIDGet);
+locationsRouter.get("/id/:id", locationsIDGet);
 locationsRouter.get("/", locationsGet);
 
 export default locationsRouter;

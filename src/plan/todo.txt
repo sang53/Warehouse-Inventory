@@ -1,5 +1,5 @@
 Make DB scripts to add initial data to database
-add buttons to functionalities...
+Change error status codes according to situation
 Test & Bugfix
 Add styling
 Add comments

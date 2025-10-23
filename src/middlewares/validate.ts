@@ -12,11 +12,8 @@ export function validateAlphaNum(field: string) {
 }
 
 export function validateInt(field: string) {
-  const errorMsg = `${field} Must Be Integer`;
-  return [
-    body(field).optional().toInt().isInt().withMessage(errorMsg),
-    param(field).optional().toInt().isInt().withMessage(errorMsg),
-  ];
+  const errorMsg = `${field} must be an integer > 0`;
+  return param(field).toInt().isInt({ min: 1 }).withMessage(errorMsg);
 }
 
 export function validateIntArr(field: string) {

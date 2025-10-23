@@ -14,7 +14,7 @@
     const input = document.getElementById("search-bar-input");
     const btn = document.getElementById("search-button");
     btn.addEventListener("click", () => {
-      window.location.href = `${input.value}`;
+      window.location.href = `${window.location.pathname}/id/${input.value}`;
     });
   </script>
 <% } %>

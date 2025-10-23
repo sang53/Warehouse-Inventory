@@ -37,7 +37,7 @@ export const tasksGet = [
 
 export const tasksIDGet = [
   ensureRole(),
-  ...validateInt("id"),
+  validateInt("id"),
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
@@ -57,7 +57,7 @@ export const tasksIDGet = [
 ];
 
 export const tasksIDPost = [
-  ...validateInt("id"),
+  validateInt("id"),
   checkValidation,
   async (req: Request, res: Response) => {
     const { id } = matchedData<{ id: number }>(req);

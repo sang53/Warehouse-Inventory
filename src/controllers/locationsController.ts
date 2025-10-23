@@ -22,14 +22,17 @@ export const locationsGet = [
 ];
 
 export const locationsIDGet = [
-  ...validateInt("id"),
+  validateInt("id"),
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
-    const [[location], [{ t_id }]] = await Promise.all([
-      Location.get({ l_id: id }),
-      FullTask.getByRels({ l_id: id }),
-    ]);
+    const [location] = await Location.get({ l_id: id });
+    let t_id: number | null;
+    try {
+      t_id = (await FullTask.getByRels({ l_id: id }))[0].t_id;
+    } catch {
+      t_id = null;
+    }
 
     res.locals = getLocationLocals({
       location,

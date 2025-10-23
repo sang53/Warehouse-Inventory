@@ -27,7 +27,7 @@
         <%- include("partials/table.ejs", { tableData: products.missing }) %>
       <% } %>
     </div>
-    <form action="/task/<%= task.t_id %>" method="post">
+    <form action="/task/id/<%= task.t_id %>" method="post">
       <button type="submit">Complete Task</button>
     </form>
   </body>
