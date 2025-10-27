@@ -19,8 +19,8 @@ export default class Pallet {
     this.pa_id = pa_id;
   }
 
-  static async create() {
-    const output = await GeneralModel.create("pallets");
+  static async create(client?: PoolClient) {
+    const output = await GeneralModel.create("pallets", undefined, client);
     return new Pallet(output);
   }
 

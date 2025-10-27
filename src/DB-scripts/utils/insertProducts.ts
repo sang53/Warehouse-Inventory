@@ -1,3 +1,4 @@
+import { PoolClient } from "pg";
 import Product from "../../models/productsModel.ts";
 
 const testProducts = [
@@ -9,8 +10,13 @@ const testProducts = [
   "Corona",
   "Kloud",
   "Somersby Apple Cider",
-];
+  "Heineken Lager Beer",
+  "Hahn Super Dry",
+] as const;
 
-export default async function () {
-  await Promise.all(testProducts.map((p_name) => Product.create({ p_name })));
+export default async function (client: PoolClient) {
+  await Promise.all(
+    testProducts.map((p_name) => Product.create({ p_name }, client)),
+  );
+  return testProducts.length;
 }

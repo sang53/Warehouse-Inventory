@@ -1,5 +1,6 @@
 import GeneralModel from "./generalModel.ts";
 import db from "../config/pool.ts";
+import { PoolClient } from "pg";
 
 export interface InProduct {
   p_name: string;
@@ -25,8 +26,8 @@ export default class Product {
     this.p_id = data.p_id;
   }
 
-  static async create(data: InProduct) {
-    const output = await GeneralModel.create("products", data);
+  static async create(data: InProduct, client?: PoolClient) {
+    const output = await GeneralModel.create("products", data, client);
     return new Product(output);
   }
 

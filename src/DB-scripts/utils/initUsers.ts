@@ -1,6 +1,5 @@
-import db from "../../config/pool.ts";
-import * as argon2 from "argon2";
-import GeneralModel from "../../models/generalModel.ts";
+import { PoolClient } from "pg";
+import User from "../../models/usersModel.ts";
 
 const USER_TYPES = ["admin", "intake", "picker", "outgoing"] as const;
 const USERS = [
@@ -30,27 +29,10 @@ const USERS = [
   },
 ];
 
-export default async function () {
-  const client = await db.connect();
-  try {
-    await client.query("BEGIN");
-    const hashedUsers = await Promise.all(
-      USERS.map(async (userData) => {
-        return { ...userData, password: await argon2.hash(userData.password) };
-      }),
-    );
-    await Promise.all(
-      hashedUsers.map((userData) =>
-        GeneralModel.create("users", userData, client),
-      ),
-    );
-    await client.query("COMMIT");
-  } catch (error) {
-    console.error("Error inserting default users", error);
-    await client.query("ROLLBACK");
-  } finally {
-    client.release();
-  }
+export default async function (client: PoolClient) {
+  return await Promise.all(
+    USERS.map((userData) => User.create(userData, client)),
+  );
 }
 
 function capitalise(str: string) {

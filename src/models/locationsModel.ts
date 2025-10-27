@@ -34,8 +34,8 @@ export default class Location {
     this.l_role = data.l_role;
   }
 
-  static async create(data: InLocation) {
-    const output = await GeneralModel.create("locations", data);
+  static async create(data: InLocation, client?: PoolClient) {
+    const output = await GeneralModel.create("locations", data, client);
     return new Location(output);
   }
 
@@ -100,7 +100,11 @@ export default class Location {
     if (l_id) await Location.#update({ pa_id }, { l_id }, client);
   }
 
-  static async getByProducts(products: Map<number, number>) {
+  static async getByProducts(
+    products: Map<number, number>,
+    client?: PoolClient,
+  ) {
+    const connection = client ?? db;
     const query = `
     SELECT b.p_id, b.stock, a.pa_id, a.l_name
     FROM p_pa b
@@ -108,7 +112,7 @@ export default class Location {
     WHERE a.l_role = 'storage' AND b.p_id = ANY($1)
     ORDER BY a.l_name;`;
 
-    const { rows } = await db.query<LocationData>(query, [
+    const { rows } = await connection.query<LocationData>(query, [
       Array.from(products.keys()),
     ]);
     return rows;

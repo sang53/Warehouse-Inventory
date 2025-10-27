@@ -9,7 +9,10 @@ export async function createOrder(
   o_type: OrderType,
   products: number[],
   stock: number[],
+  client?: PoolClient,
 ) {
+  if (client)
+    return await interalCreateOrder(client, { o_type, products, stock });
   return await transaction(interalCreateOrder, { o_type, products, stock });
 }
 

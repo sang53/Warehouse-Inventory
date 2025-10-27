@@ -14,7 +14,11 @@ const LTYPEMAP = {
   pick: "outgoing",
 } as const;
 
-export async function getCurrentTask(user: User, start: boolean = true) {
+export async function getCurrentTask(
+  user: User,
+  start: boolean = true,
+  client?: PoolClient,
+) {
   try {
     // if task already assigned to user
     const [task] = await FullTask.getByRels({ u_id: user.u_id });
@@ -35,6 +39,7 @@ export async function getCurrentTask(user: User, start: boolean = true) {
   const task = await Task.getNewByTypes(USER_TASK_MAP[user.u_role]);
   if (!task) return null;
 
+  if (client) return await startTask(client, { task, user });
   return await transaction(startTask, { task, user });
 }
 
@@ -53,8 +58,9 @@ async function startTask(
   return await fullTask.setStart(true, client);
 }
 
-export async function completeTask(task: FullTask) {
-  await transaction(internalCompleteTask, task);
+export async function completeTask(task: FullTask, client?: PoolClient) {
+  if (client) await internalCompleteTask(client, task);
+  else await transaction(internalCompleteTask, task);
 }
 
 async function internalCompleteTask(client: PoolClient, task: FullTask) {

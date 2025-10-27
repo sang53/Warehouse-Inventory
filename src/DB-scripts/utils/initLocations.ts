@@ -1,5 +1,5 @@
-import db from "../../config/pool.ts";
-import GeneralModel from "../../models/generalModel.ts";
+import { PoolClient } from "pg";
+import Location from "../../models/locationsModel.ts";
 
 const HEIGHT = 9;
 const WIDTH = 9;
@@ -12,20 +12,8 @@ const LOCATIONS_DATA = Array.from({ length: HEIGHT * WIDTH }, (_v, k) => {
   return { l_name: `${String(row)}-${col}`, l_role };
 });
 
-export default async function () {
-  const client = await db.connect();
-  try {
-    await client.query("BEGIN");
-    await Promise.all(
-      LOCATIONS_DATA.map((locationData) =>
-        GeneralModel.create("locations", locationData, client),
-      ),
-    );
-    await client.query("COMMIT");
-  } catch (error) {
-    console.error("Error inserting default locations:", error);
-    await client.query("ROLLBACK");
-  } finally {
-    client.release();
-  }
+export default async function (client: PoolClient) {
+  await Promise.all(
+    LOCATIONS_DATA.map((locationData) => Location.create(locationData, client)),
+  );
 }

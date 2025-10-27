@@ -1,3 +1,4 @@
+import { PoolClient } from "pg";
 import GeneralModel from "./generalModel.ts";
 import * as argon2 from "argon2";
 
@@ -49,9 +50,9 @@ export default class User {
     });
   }
 
-  static async create(data: InUser) {
+  static async create(data: InUser, client?: PoolClient) {
     data.password = await argon2.hash(data.password);
-    const output = await GeneralModel.create("users", data);
+    const output = await GeneralModel.create("users", data, client);
     return new User(output);
   }
 }

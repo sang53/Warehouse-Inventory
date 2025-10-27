@@ -6,7 +6,7 @@ export async function removeFromStorage(
   products: Map<number, number>,
   client: PoolClient,
 ) {
-  const { data, missing } = await getProductInfo(products);
+  const { data, missing } = await getProductInfo(products, client);
   // Handle case of not enough stock
   if (missing.length)
     throw new Error(`Not Enough Stock: ${JSON.stringify(missing)}`);
@@ -18,8 +18,11 @@ export async function removeFromStorage(
   await ProductPallet.removeEmpty(paIds, client);
 }
 
-export async function getProductInfo(products: Map<number, number>) {
-  const output = await Location.getByProducts(products);
+export async function getProductInfo(
+  products: Map<number, number>,
+  client: PoolClient,
+) {
+  const output = await Location.getByProducts(products, client);
   const data: typeof output = [];
 
   // keep track of how much stock required for each product
