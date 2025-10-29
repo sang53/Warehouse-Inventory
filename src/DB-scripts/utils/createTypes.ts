@@ -11,10 +11,8 @@ export async function createTypes() {
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");
-    console.error("Error creating types:", error);
+    console.error(error);
   } finally {
     client.release();
   }
 }
-
-await createTypes();

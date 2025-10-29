@@ -12,20 +12,19 @@ const STOCK_RANGE = [5, 20] as const;
 const MAX_TOTAL = 500;
 const MAX_PALLET = 50;
 
-export default async function (client: PoolClient, NUM_PRODUCTS: number) {
-  const storageData = getStorageData(NUM_PRODUCTS);
+export default async function (client: PoolClient, pIds: number[]) {
+  const storageData = getStorageData(pIds);
 
   const paIds = await createPallets(storageData.length, client);
   const palletStorageData = getPalletStorageData(storageData, paIds);
 
   // add products to pallets & move to storage location
   await ProductPallet.modifyProducts(palletStorageData, client, "+");
-  await setPalletLocations(paIds);
+  await setPalletLocations(paIds, client);
 }
 
 // returns products & stocks grouped into pallets
-function getStorageData(NUM_PRODUCTS: number) {
-  const pIds = Array.from({ length: NUM_PRODUCTS }).map((_v, i) => i + 1);
+function getStorageData(pIds: number[]) {
   let storageData: ProductStock[][] = [];
   let storageTotal = 0;
 
@@ -56,22 +55,24 @@ function groupIntoPallets(productStocks: ProductStock[]) {
   let currPallet: ProductStock[] = [];
   let palletTotal = 0;
   let groupStockTotal = 0;
+  const seenPID = new Set<number>();
 
   for (const productStock of productStocks) {
+    if (seenPID.has(productStock.p_id) || palletTotal > MAX_PALLET) {
+      // if stock on current pallet > max:
+      // add current pallet to data & reset to new pallet
+      groupedProducts.push(currPallet);
+      currPallet = [];
+
+      // update overall total & reset pallet stock count
+      groupStockTotal += palletTotal;
+      palletTotal = 0;
+      seenPID.clear();
+    }
     // add product & stock to current pallet
     currPallet.push(productStock);
     palletTotal += productStock.stock;
-
-    if (palletTotal < MAX_PALLET) continue;
-
-    // if stock on current pallet > max:
-    // add current pallet to data & reset to new pallet
-    groupedProducts.push(currPallet);
-    currPallet = [];
-
-    // update overall total & reset pallet stock count
-    groupStockTotal += palletTotal;
-    palletTotal = 0;
+    seenPID.add(productStock.p_id);
   }
   if (palletTotal) {
     groupedProducts.push(currPallet);
@@ -91,22 +92,23 @@ function getPalletStorageData(storageData: ProductStock[][], paIds: number[]) {
   if (paIds.length !== storageData.length)
     throw new Error("Incorrect number of pallets created");
 
-  return storageData.flatMap((productStocks) =>
-    productStocks.map((productStock, idx) => ({
+  return storageData.flatMap((productStocks, idx) =>
+    productStocks.map((productStock) => ({
       ...productStock,
       pa_id: paIds[idx] ?? 1,
     })),
   );
 }
 
-async function setPalletLocations(paIds: number[]) {
+async function setPalletLocations(paIds: number[], client: PoolClient) {
   const storageLocations = await Location.get(
     { l_role: "storage" },
     paIds.length,
+    client,
   );
   await Promise.all(
     storageLocations.map(({ l_id }, idx) =>
-      Location.movePallet(paIds[idx] ?? 0, l_id),
+      Location.movePallet(paIds[idx] ?? 0, l_id, client),
     ),
   );
 }

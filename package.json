@@ -6,6 +6,7 @@
   "scripts": {
     "restart": "pnpm do src/DB-scripts/restart.ts",
     "reset": "pnpm do src/DB-scripts/resetData.ts",
+    "initData": "pnpm do src/DB-scripts/initData.ts",
     "start": "nodemon src/app.ts",
     "do": "node --loader ts-node/esm"
   },

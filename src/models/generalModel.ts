@@ -48,9 +48,9 @@ export default (function () {
     const connection = client ?? db;
     const queryValues = data
       ? `${getColumnNames(data)} VALUES ${getPlaceholders(Object.keys(data).length)}`
-      : "";
+      : "DEFAULT VALUES";
     const query = `INSERT INTO ${table} ${queryValues} RETURNING *;`;
-    const values = getValues(data);
+    const values = getValues(data, false);
 
     const output = await connection.query<TableOutputs[TName]>(query, values);
     return parseOutput(output.rows)[0];
@@ -64,6 +64,7 @@ export default (function () {
       desc = false,
       conditions,
     }: SelectOptions<TableOutputs[TName]> = {},
+    client?: PoolClient,
   ) {
     let query = `SELECT * FROM ${table}`;
     query += getConditionals(1, conditions);
@@ -71,7 +72,9 @@ export default (function () {
     query += getLimit(limit);
     query += ";";
 
-    const output = await db.query<TableOutputs[TName]>(
+    const connection = client ?? db;
+
+    const output = await connection.query<TableOutputs[TName]>(
       query,
       getValues(conditions),
     );
@@ -82,6 +85,7 @@ export default (function () {
     join: string,
     tableName: string,
     { order, limit = 1, desc = false, conditions }: SelectOptions<T1> = {},
+    client?: PoolClient,
   ) {
     const tablePrefix = tableName ? tableName + "." : "";
     let query = `SELECT * FROM ${join}`;
@@ -90,7 +94,8 @@ export default (function () {
     query += getLimit(limit);
     query += ";";
 
-    const output = await db.query<T1>(query, getValues(conditions));
+    const connection = client ?? db;
+    const output = await connection.query<T1>(query, getValues(conditions));
     return output.rows;
   }
 
@@ -107,13 +112,16 @@ export default (function () {
       desc = false,
       conditions,
     }: SelectOptions<TableOutputs[TName]>,
+    client?: PoolClient,
   ) {
+    const CValues = getValues(conditions);
     const CQuery = conditions
       ? getConditionals(1, conditions) +
-        ` AND ${column} = ANY($${String(Object.keys(conditions).length + 1)})`
+        ` AND ${column} = ANY($${String(CValues.length + 1)})`
       : ` WHERE ${column} = ANY($1)`;
-    const CValues = conditions ? Object.values(conditions) : [];
-    const output = await db.query<TableOutputs[TName]>(
+
+    const connection = client ?? db;
+    const output = await connection.query<TableOutputs[TName]>(
       `SELECT * from ${table}${CQuery}${getOrder(order, desc)}${getLimit(limit)};`,
       [...CValues, values],
     );
@@ -129,11 +137,11 @@ export default (function () {
     const connection = client ?? db;
     const dataPlaceholder = Object.keys(data).length;
     const output = await connection.query<TableOutputs[TName]>(
-      `UPDATE ${table} SET ${getColumnNames(data)} = ${getPlaceholders(dataPlaceholder)}
+      `UPDATE ${table} SET ${getColumnNames(data)} = ROW${getPlaceholders(dataPlaceholder)}
       ${getConditionals(dataPlaceholder + 1, conditions)} RETURNING *;`,
       Object.values(data).concat(getValues(conditions)),
     );
-    return parseOutput(output.rows);
+    return output.rows;
   }
 
   async function remove<TName extends TableNames>(
@@ -180,11 +188,16 @@ export default (function () {
     tablePrefix?: string,
   ) {
     if (!conditions) return "";
-    const conditionString = Object.keys(conditions)
-      .map(
-        (column) => `${tablePrefix ?? ""}${column} = $${String(placeholder++)}`,
-      )
+
+    const conditionString = Object.entries(conditions)
+      .map(([column, value]) => {
+        const prefixColumn = `${tablePrefix ?? ""}${column}`;
+        return value === null
+          ? `${prefixColumn} IS NULL`
+          : `${prefixColumn} = $${String(placeholder++)}`;
+      })
       .join(" AND ");
+
     return ` WHERE ${conditionString}`;
   }
 
@@ -193,8 +206,12 @@ export default (function () {
     return data as [T, ...T[]];
   }
 
-  function getValues(data: object | undefined): unknown[] {
-    return data ? Object.values(data) : [];
+  function getValues(
+    data: object | undefined,
+    excludeNull: boolean = true,
+  ): unknown[] {
+    const values = data ? Object.values(data) : [];
+    return excludeNull ? values.filter((value) => value !== null) : values;
   }
 
   function getOrder(

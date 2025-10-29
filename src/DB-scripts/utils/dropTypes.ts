@@ -2,9 +2,7 @@ import db from "../../config/pool.ts";
 import tableSchema from "../../config/tableSchema.ts";
 
 export async function dropTypes() {
-  await Promise.allSettled(
-    Object.keys(tableSchema.TYPES).map((type) =>
-      db.query(`DROP TYPE ${type} CASCADE;`),
-    ),
-  );
+  const TTYPES = Object.keys(tableSchema.TYPES);
+  for (const type of TTYPES)
+    await db.query(`DROP TYPE IF EXISTS ${type} CASCADE;`);
 }

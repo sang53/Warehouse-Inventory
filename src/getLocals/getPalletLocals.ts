@@ -12,6 +12,7 @@ export function getPalletLocals({ pallet, l_name }: PalletLocals) {
     viewData: {
       l_name,
       pa_id: pallet.pa_id,
+      created: pallet.created,
       products: mapToView(pallet.products),
     },
   };

@@ -39,11 +39,19 @@ export default class Location {
     return new Location(output);
   }
 
-  static async get(data: Partial<OutLocation>, limit?: number | null) {
-    const output = await GeneralModel.get("locations", {
-      conditions: data,
-      limit,
-    });
+  static async get(
+    data: Partial<OutLocation>,
+    limit?: number | null,
+    client?: PoolClient,
+  ) {
+    const output = await GeneralModel.get(
+      "locations",
+      {
+        conditions: data,
+        limit,
+      },
+      client,
+    );
     const locations = output.map((location) => new Location(location));
     return GeneralModel.parseOutput(locations, `Location Not Found`);
   }
@@ -67,7 +75,7 @@ export default class Location {
     return output.map((location) => new Location(location));
   }
 
-  static async getEmpty(l_role: LocationType) {
+  static async getEmpty(l_role: LocationType, client?: PoolClient) {
     // query to find empty locations
     // selects locations of l_role with no current pallet
     // excludes locations that have a uncompleted task associated with the location
@@ -75,7 +83,7 @@ export default class Location {
       WHERE a.l_role = $1
       AND a.pa_id IS NULL
       AND NOT EXISTS (
-        SELECT 1 FROM tasksb
+        SELECT 1 FROM tasks b
         JOIN taskRels c
         ON b.t_id = c.t_id
         WHERE a.l_id = c.l_id 
@@ -83,7 +91,9 @@ export default class Location {
       )
       LIMIT 1;`;
 
-    const output = await db.query<{ l_id: number }>(query, [l_role]);
+    const connection = client ?? db;
+
+    const output = await connection.query<{ l_id: number }>(query, [l_role]);
     const [location] = GeneralModel.parseOutput(
       output.rows,
       `No empty locations of ${l_role} - report to admin`,

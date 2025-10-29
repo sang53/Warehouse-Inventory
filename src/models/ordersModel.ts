@@ -22,7 +22,7 @@ export default class Order {
   placed: string;
   t_id: number;
 
-  static Query = `orderss AS a
+  static Query = `orders AS a
     LEFT JOIN o_t AS b
     ON a.o_id = b.o_id`;
 
@@ -52,13 +52,19 @@ export default class Order {
     return output.map((order) => new Order(order));
   }
 
-  static async getByTask(t_id: number) {
-    const query = `SELECT * FROM o_t a
+  static async getByTask(t_id: number, client?: PoolClient) {
+    const query = `o_t a
     JOIN orders b
-    ON a.o_id = b.o_id;`;
-    const output = await GeneralModel.getJoin<OutOrder>(query, "a", {
-      conditions: { t_id },
-    });
+    ON a.o_id = b.o_id`;
+    const output = await GeneralModel.getJoin<OutOrder>(
+      query,
+      "a",
+      {
+        conditions: { t_id },
+      },
+      client,
+    );
+
     const [order] = GeneralModel.parseOutput(
       output,
       `Task ${String(t_id)} not associated with Order`,
@@ -93,12 +99,13 @@ export default class Order {
     return this;
   }
 
-  async complete() {
+  async complete(client: PoolClient) {
     this.completed = await GeneralModel.timestamp(
       "orders",
       "completed",
       { o_id: this.o_id },
       true,
+      client,
     );
     return this;
   }
@@ -112,8 +119,8 @@ export class ProductOrder extends Order {
     this.products = this.#getProductMap(products, stock);
   }
 
-  static async getProducts(order: Order) {
-    const products = await this.#queryProducts(order.o_id);
+  static async getProducts(order: Order, client?: PoolClient) {
+    const products = await this.#queryProducts(order.o_id, client);
 
     return new ProductOrder(
       order,
@@ -174,18 +181,28 @@ export class ProductOrder extends Order {
     );
   }
 
-  static async validateProducts(products: number[]) {
+  static async validateProducts(products: number[], client?: PoolClient) {
     // make sure all p_ids are in DB
-    return await GeneralModel.getArray("products", "p_id", products, {
-      limit: null,
-    });
+    return await GeneralModel.getArray(
+      "products",
+      "p_id",
+      products,
+      {
+        limit: null,
+      },
+      client,
+    );
   }
 
-  static async #queryProducts(o_id: number) {
-    return await GeneralModel.get("o_p", {
-      conditions: { o_id },
-      limit: null,
-    });
+  static async #queryProducts(o_id: number, client?: PoolClient) {
+    return await GeneralModel.get(
+      "o_p",
+      {
+        conditions: { o_id },
+        limit: null,
+      },
+      client,
+    );
   }
 
   #getProductMap(products: number[], stock: number[]) {

@@ -26,7 +26,7 @@ async function interalCreateOrder(
 ) {
   const task = await createFirstTask(o_type, client);
 
-  await validateProducts(products);
+  await validateProducts(products, client);
 
   // create order & link task
   const order = await ProductOrder.create(
@@ -43,7 +43,7 @@ async function createFirstTask(o_type: OrderType, client: PoolClient) {
   const t_type = o_type === "IN" ? "arrival" : "pick";
 
   // create new pallet and assign to new task
-  const pallet = await Pallet.create();
+  const pallet = await Pallet.create(client);
   return await FullTask.create(client, { t_type }, pallet.pa_id);
 }
 
@@ -59,12 +59,12 @@ export async function completeOrder(
       ProductPallet.removePallet(task.pa_id, client),
     ]);
   }
-  await order.complete();
+  await order.complete(client);
   return null;
 }
 
-async function validateProducts(products: number[]) {
-  const DBproducts = await ProductOrder.validateProducts(products);
+async function validateProducts(products: number[], client: PoolClient) {
+  const DBproducts = await ProductOrder.validateProducts(products, client);
 
   const ValidProducts = new Set(DBproducts.map((product) => product.p_id));
   const invalidProducts = products.filter((p_id) => !ValidProducts.has(p_id));

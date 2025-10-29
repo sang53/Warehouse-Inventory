@@ -10,13 +10,14 @@ export async function initData() {
   try {
     await client.query("BEGIN");
 
-    const [NUM_PRODUCTS, users] = await Promise.all([
+    const [products, users] = await Promise.all([
       insertProducts(client),
       initUsers(client),
       initLocations(client),
     ]);
-    await insertStorage(client, NUM_PRODUCTS);
-    await initOrdersTasks(client, NUM_PRODUCTS, users);
+    const pIds = products.map(({ p_id }) => p_id);
+    await insertStorage(client, pIds);
+    await initOrdersTasks(client, pIds, users);
 
     await client.query("COMMIT");
   } catch (err) {

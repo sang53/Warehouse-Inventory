@@ -66,11 +66,17 @@ export default class Task {
   }
 
   // returns a new task by array of t_types
-  static async getNewByTypes(types: TaskType[]) {
-    const [task] = await GeneralModel.getArray("tasks", "t_type", types, {
-      order: ["placed"],
-      conditions: { started: null },
-    });
+  static async getNewByTypes(types: TaskType[], client?: PoolClient) {
+    const [task] = await GeneralModel.getArray(
+      "tasks",
+      "t_type",
+      types,
+      {
+        order: ["placed"],
+        conditions: { started: null },
+      },
+      client,
+    );
     if (!task) return null;
     return new Task(task);
   }

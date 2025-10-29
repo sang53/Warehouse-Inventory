@@ -8,14 +8,14 @@ const maxIterations = 5;
 
 export default async function (
   client: PoolClient,
-  NUM_PRODUCTS: number,
+  pIds: number[],
   users: User[],
 ) {
   const iterations = randInt(maxIterations);
   const taskUsers = users.filter(({ u_role }) => u_role !== "admin");
 
   for (let i = 0; i < iterations; i++) {
-    await insertOrders(client, NUM_PRODUCTS);
+    await insertOrders(client, pIds);
     await progressOrders(client, taskUsers);
   }
 }

@@ -4,6 +4,7 @@ import { PoolClient } from "pg";
 
 export interface OutPallet {
   pa_id: number;
+  created: string;
 }
 
 export interface ProductStock {
@@ -14,9 +15,11 @@ export interface ProductStock {
 // Basic Pallet Model
 export default class Pallet {
   pa_id: number;
+  created: string;
 
-  constructor({ pa_id }: OutPallet) {
+  constructor({ pa_id, created }: OutPallet) {
     this.pa_id = pa_id;
+    this.created = created;
   }
 
   static async create(client?: PoolClient) {
@@ -27,7 +30,8 @@ export default class Pallet {
   static async getAll() {
     const output = await GeneralModel.get("pallets", {
       desc: true,
-      order: ["pa_id"],
+      order: ["created"],
+      limit: null,
     });
     return output.map((pallet) => new Pallet(pallet));
   }
@@ -60,12 +64,17 @@ export class ProductPallet extends Pallet {
     return new Map(products.map(({ p_id, stock }) => [p_id, stock]));
   }
 
-  static async get(data: OutPallet) {
-    const output = await GeneralModel.get("p_pa", {
-      conditions: data,
+  static async get({ pa_id }: Pick<OutPallet, "pa_id">) {
+    const pallet = await GeneralModel.get("pallets", {
+      conditions: { pa_id },
+    });
+    const [{ created }] = GeneralModel.parseOutput(pallet);
+
+    const productOutput = await GeneralModel.get("p_pa", {
+      conditions: { pa_id },
       limit: null,
     });
-    return new ProductPallet({ pa_id: data.pa_id }, output);
+    return new ProductPallet({ pa_id, created }, productOutput);
   }
 
   static async removePallet(pa_id: number, client: PoolClient) {
@@ -118,7 +127,7 @@ export class ProductPallet extends Pallet {
   }
 
   static async modifyProducts(
-    productData: (ProductStock & OutPallet)[],
+    productData: (ProductStock & Pick<OutPallet, "pa_id">)[],
     client: PoolClient,
     operator: "+" | "-",
   ) {

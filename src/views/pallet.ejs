@@ -3,11 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Order <%= order.o_id %></title>
+    <title>Pallet <%= pa_id %></title>
     <body>
       <%- include("partials/header.ejs") %>
       <div class="main">
         <h1>Pallet <%= pa_id %></h1>
+        <h2>Created: <%= created %></h2>
         <h2>Current Location: <%= l_name %></h2>
         <h1>Products</h1>
         <%- include("partials/table.ejs", { tableData: products }) %>

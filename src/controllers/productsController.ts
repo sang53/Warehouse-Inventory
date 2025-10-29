@@ -62,7 +62,6 @@ export const productsIDGet = [
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
     const product = await Product.getStockByProduct(id);
-    console.log(id);
 
     res.locals = getDisplayLocals([
       {

@@ -11,7 +11,8 @@ const TABLESCHEMAS = {
     p_name TEXT UNIQUE NOT NULL
 );`,
   pallets: `CREATE TABLE pallets (
-    pa_id SERIAL PRIMARY KEY
+    pa_id SERIAL PRIMARY KEY,
+    created TIMESTAMPTZ DEFAULT NOW()
 );`,
   locations: `CREATE TABLE locations (
     l_id SERIAL PRIMARY KEY,
@@ -58,9 +59,9 @@ const TABLESCHEMAS = {
 );`,
   taskRels: `CREATE TABLE taskRels (
     t_id INT PRIMARY KEY REFERENCES tasks(t_id),
-    l_id INT UNIQUE REFERENCES locations(l_id),
-    pa_id INT UNIQUE REFERENCES pallets(pa_id),
-    u_id INT UNIQUE REFERENCES users(u_id)
+    l_id INT REFERENCES locations(l_id),
+    pa_id INT REFERENCES pallets(pa_id) ON DELETE SET NULL,
+    u_id INT REFERENCES users(u_id)
 );`,
 };
 

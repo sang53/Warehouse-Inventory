@@ -36,7 +36,7 @@ export async function getCurrentTask(
     admin: [],
   } as const;
 
-  const task = await Task.getNewByTypes(USER_TASK_MAP[user.u_role]);
+  const task = await Task.getNewByTypes(USER_TASK_MAP[user.u_role], client);
   if (!task) return null;
 
   if (client) return await startTask(client, { task, user });
@@ -51,7 +51,7 @@ async function startTask(
 
   if (needsLocation(task.t_type))
     // overwrite current location w/ new location
-    taskRels.l_id = await Location.getEmpty(LTYPEMAP[task.t_type]);
+    taskRels.l_id = await Location.getEmpty(LTYPEMAP[task.t_type], client);
 
   // save task rels & start timestamp in transaction
   const fullTask = await task.updateRels(taskRels, client);
@@ -64,10 +64,10 @@ export async function completeTask(task: FullTask, client?: PoolClient) {
 }
 
 async function internalCompleteTask(client: PoolClient, task: FullTask) {
-  const order = await Order.getByTask(task.t_id);
+  const order = await Order.getByTask(task.t_id, client);
 
   if (needsPallet(task.t_type)) {
-    const fullOrder = await ProductOrder.getProducts(order);
+    const fullOrder = await ProductOrder.getProducts(order, client);
 
     // remove products from storage if picking task
     if (task.t_type === "pick")

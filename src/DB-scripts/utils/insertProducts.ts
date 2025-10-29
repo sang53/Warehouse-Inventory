@@ -15,8 +15,7 @@ const testProducts = [
 ] as const;
 
 export default async function (client: PoolClient) {
-  await Promise.all(
+  return await Promise.all(
     testProducts.map((p_name) => Product.create({ p_name }, client)),
   );
-  return testProducts.length;
 }
