@@ -228,6 +228,14 @@ export default (function () {
     return limit ? ` LIMIT ${String(limit)}` : "";
   }
 
+  function parseTimestamp(timestamp: null): null;
+  function parseTimestamp(timestamp: string): string;
+  function parseTimestamp(timestamp: string | null): string | null;
+  function parseTimestamp(timestamp: string | null) {
+    if (!timestamp) return null;
+    return new Date(timestamp).toISOString();
+  }
+
   return {
     create,
     get,
@@ -237,5 +245,6 @@ export default (function () {
     getJoin,
     getArray,
     remove,
+    parseTimestamp,
   };
 })();

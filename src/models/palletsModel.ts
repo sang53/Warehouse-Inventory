@@ -19,7 +19,7 @@ export default class Pallet {
 
   constructor({ pa_id, created }: OutPallet) {
     this.pa_id = pa_id;
-    this.created = created;
+    this.created = GeneralModel.parseTimestamp(created);
   }
 
   static async create(client?: PoolClient) {

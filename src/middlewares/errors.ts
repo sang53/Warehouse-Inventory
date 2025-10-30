@@ -27,7 +27,8 @@ export function renderErrorPage(
   res: Response,
   _next: NextFunction,
 ) {
-  res.status(401).render("errorPage", {
+  if (res.statusCode === 200) res.status(500);
+  res.render("errorPage", {
     errors,
   });
 }

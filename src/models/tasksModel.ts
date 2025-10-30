@@ -46,9 +46,9 @@ export default class Task {
   constructor(data: OutTask) {
     this.t_id = data.t_id;
     this.t_type = data.t_type;
-    this.placed = data.placed;
-    this.started = data.started;
-    this.completed = data.completed;
+    this.placed = GeneralModel.parseTimestamp(data.placed);
+    this.started = GeneralModel.parseTimestamp(data.started);
+    this.completed = GeneralModel.parseTimestamp(data.completed);
   }
 
   static async get(data: Partial<OutTask>, limit?: number | null) {
@@ -61,7 +61,10 @@ export default class Task {
   }
 
   static async getAll() {
-    const output = await GeneralModel.get("tasks", { limit: 50 });
+    const output = await GeneralModel.get("tasks", {
+      limit: 50,
+      order: ["placed"],
+    });
     return output.map((task) => new Task(task));
   }
 
@@ -131,7 +134,7 @@ export default class Task {
     value: boolean,
     client?: PoolClient,
   ) {
-    this[column] = await GeneralModel.timestamp(
+    const timestamp = await GeneralModel.timestamp(
       "tasks",
       column,
       {
@@ -140,6 +143,7 @@ export default class Task {
       value,
       client,
     );
+    this[column] = GeneralModel.parseTimestamp(timestamp);
   }
 }
 
@@ -208,6 +212,8 @@ export class FullTask extends Task {
     tasks a
     LEFT JOIN taskRels b
     ON a.t_id = b.t_id
+    LEFT JOIN o_t c
+    ON a.t_id = c.t_id
     WHERE a.completed IS${complete ? " NOT" : ""} NULL
     ORDER BY a.placed
     LIMIT 20;`;

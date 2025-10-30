@@ -34,10 +34,13 @@ export function validateOType(field: string = "o_type") {
 
 export function checkValidation(
   req: Request,
-  _res: Response,
+  res: Response,
   next: NextFunction,
 ) {
   const errors = validationResult(req);
   if (errors.isEmpty()) next();
-  else next(errors.array());
+  else {
+    res.status(400);
+    next(errors.array());
+  }
 }

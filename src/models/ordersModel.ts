@@ -28,9 +28,9 @@ export default class Order {
 
   constructor(data: OutOrder) {
     this.o_id = data.o_id;
-    this.completed = data.completed;
+    this.completed = GeneralModel.parseTimestamp(data.completed);
     this.o_type = data.o_type;
-    this.placed = data.placed;
+    this.placed = GeneralModel.parseTimestamp(data.placed);
     this.t_id = data.t_id;
   }
 
@@ -100,13 +100,14 @@ export default class Order {
   }
 
   async complete(client: PoolClient) {
-    this.completed = await GeneralModel.timestamp(
+    const completed = await GeneralModel.timestamp(
       "orders",
       "completed",
       { o_id: this.o_id },
       true,
       client,
     );
+    this.completed = GeneralModel.parseTimestamp(completed);
     return this;
   }
 }

@@ -1,6 +1,3 @@
-Change error status codes according to situation
-Change Dates to not include timezone data OR automatically convert to browser timezone
-add o_id to tasks views
 Test & Bugfix
 indiv product stock counts being very wrong
 IN orders not working?
