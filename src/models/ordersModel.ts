@@ -1,6 +1,7 @@
 import GeneralModel from "./generalModel.ts";
 import db from "../config/pool.ts";
 import { PoolClient } from "pg";
+import extractKeys from "../utils/extractKeys.ts";
 
 export interface InOrder {
   o_type: OrderType;
@@ -13,6 +14,13 @@ export interface OutOrder extends InOrder {
   placed: string;
 }
 
+interface OrderInputs {
+  o_id: number;
+  completed: string | null;
+  placed: string;
+  o_type: OrderType;
+}
+
 export type OrderType = "IN" | "OUT";
 
 export default class Order {
@@ -20,74 +28,79 @@ export default class Order {
   completed: string | null;
   o_type: OrderType;
   placed: string;
-  t_id: number;
+  t_ids?: number[];
 
   static Query = `orders AS a
     LEFT JOIN o_t AS b
     ON a.o_id = b.o_id`;
 
-  constructor(data: OutOrder) {
+  constructor(data: OrderInputs, tasks?: number[]) {
     this.o_id = data.o_id;
-    this.completed = GeneralModel.parseTimestamp(data.completed);
     this.o_type = data.o_type;
     this.placed = GeneralModel.parseTimestamp(data.placed);
-    this.t_id = data.t_id;
+    this.completed = GeneralModel.parseTimestamp(data.completed);
+    this.t_ids = tasks;
   }
 
-  static async get(data: Partial<OutOrder>, limit?: number | null) {
+  static async get(
+    data: Omit<Partial<OutOrder>, "t_id">,
+    limit: number | null = 3,
+  ) {
     const output = await GeneralModel.getJoin<OutOrder>(Order.Query, "a", {
       conditions: data,
       limit,
     });
-    const orders = output.map((order) => new Order(order));
+
+    const orders = this.#processOutput(output);
     return GeneralModel.parseOutput(orders, `Order Not Found`);
   }
 
   static async getAll() {
     const output = await GeneralModel.getJoin<OutOrder>(Order.Query, "a", {
-      limit: 50,
-      desc: true,
-      order: ["placed"],
+      order: ["o_id"],
+      limit: null,
     });
-    return output.map((order) => new Order(order));
+    return this.#processOutput(output);
   }
 
   static async getByTask(t_id: number, client?: PoolClient) {
-    const query = `o_t a
-    JOIN orders b
-    ON a.o_id = b.o_id`;
+    const [orderData] = await GeneralModel.get("o_t", {
+      conditions: { t_id },
+    });
+
+    if (!orderData) {
+      console.error(`Task ${String(t_id)} not associated with order`);
+      throw new Error("System Error");
+    }
+
     const output = await GeneralModel.getJoin<OutOrder>(
-      query,
+      this.Query,
       "a",
       {
-        conditions: { t_id },
+        conditions: { o_id: orderData.o_id },
+        limit: null,
       },
       client,
     );
 
-    const [order] = GeneralModel.parseOutput(
-      output,
-      `Task ${String(t_id)} not associated with Order`,
-    );
-
-    return new Order(order);
+    const orders = this.#processOutput(output);
+    const [order] = GeneralModel.parseOutput(orders);
+    return order;
   }
 
   static async getByComplete(complete: boolean, o_type?: OrderType) {
-    const query = `SELECT * FROM o_t a
-    JOIN orders b
-    ON a.o_id = b.o_id
-    WHERE b.completed IS ${complete ? "NOT" : ""} NULL
-    ${o_type ? "AND b.o_type = $1" : ""}
-    ORDER BY b.placed
-    LIMIT 20;`;
+    const query = `
+    SELECT * FROM ${this.Query} 
+    WHERE a.completed IS ${complete ? "NOT" : ""} NULL
+    ${o_type ? "AND a.o_type = $1" : ""}
+    ORDER BY a.completed DESC;`;
 
-    const output = await db.query<OutOrder>(query, o_type ? [o_type] : []);
-    return output.rows.map((order) => new Order(order));
+    const { rows } = await db.query<OutOrder>(query, o_type ? [o_type] : []);
+    return this.#processOutput(rows);
   }
 
   async addTask(t_id: number, client: PoolClient) {
-    const output = await GeneralModel.create(
+    await GeneralModel.create(
       "o_t",
       {
         o_id: this.o_id,
@@ -95,7 +108,6 @@ export default class Order {
       },
       client,
     );
-    this.t_id = output.t_id;
     return this;
   }
 
@@ -110,13 +122,48 @@ export default class Order {
     this.completed = GeneralModel.parseTimestamp(completed);
     return this;
   }
+
+  static #getTaskIds(output: OutOrder[]) {
+    return output.reduce((map, { o_id, t_id }) => {
+      if (map.has(o_id)) map.get(o_id)?.push(t_id);
+      else map.set(o_id, [t_id]);
+      return map;
+    }, new Map<number, number[]>());
+  }
+
+  static #processOutput(output: OutOrder[]) {
+    const taskIds = this.#getTaskIds(output);
+    return output
+      .map((orderData) => {
+        if (!taskIds.has(orderData.o_id)) return null;
+        const order = new Order(orderData, taskIds.get(orderData.o_id));
+        taskIds.delete(orderData.o_id);
+        return order;
+      })
+      .filter((order) => order !== null);
+  }
+
+  getTable(
+    keys: (keyof this)[] = ["o_id", "o_type", "placed", "completed"],
+    t_ids: boolean = true,
+  ) {
+    return {
+      ...extractKeys(this, keys),
+      t_ids: t_ids ? this.t_ids?.join(", ") : undefined,
+    };
+  }
 }
 
 export class ProductOrder extends Order {
   products: Map<number, number>;
 
-  constructor(data: OutOrder, products: number[], stock: number[]) {
-    super(data);
+  constructor(
+    data: OrderInputs,
+    products: number[],
+    stock: number[],
+    tasks?: number[],
+  ) {
+    super(data, tasks);
     this.products = this.#getProductMap(products, stock);
   }
 
@@ -138,7 +185,7 @@ export class ProductOrder extends Order {
   ) {
     // create order in DB
     const output = await GeneralModel.create("orders", { o_type }, client);
-    const order = new ProductOrder({ ...output, t_id }, products, stock);
+    const order = new ProductOrder({ ...output }, products, stock);
 
     // add products/stocks & first task
     const placeholders = products
@@ -172,13 +219,16 @@ export class ProductOrder extends Order {
   }
 
   static async getFull(data: Partial<OutOrder>) {
-    const [order] = await this.get(data);
+    let order: Order;
+    if (data.t_id) order = await Order.getByTask(data.t_id);
+    else [order] = await Order.get(data);
     const products = await this.#queryProducts(order.o_id);
 
     return new ProductOrder(
       order,
       products.map(({ p_id }) => p_id),
       products.map(({ stock }) => stock),
+      order.t_ids,
     );
   }
 

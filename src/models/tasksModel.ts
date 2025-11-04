@@ -42,6 +42,7 @@ export default class Task {
   placed: string;
   started: string | null;
   completed: string | null;
+  o_id?: number;
 
   constructor(data: OutTask) {
     this.t_id = data.t_id;
@@ -49,23 +50,6 @@ export default class Task {
     this.placed = GeneralModel.parseTimestamp(data.placed);
     this.started = GeneralModel.parseTimestamp(data.started);
     this.completed = GeneralModel.parseTimestamp(data.completed);
-  }
-
-  static async get(data: Partial<OutTask>, limit?: number | null) {
-    const output = await GeneralModel.get("tasks", {
-      conditions: data,
-      limit,
-    });
-    const tasks = output.map((task) => new Task(task));
-    return GeneralModel.parseOutput(tasks, "Task Not Found");
-  }
-
-  static async getAll() {
-    const output = await GeneralModel.get("tasks", {
-      limit: 50,
-      order: ["placed"],
-    });
-    return output.map((task) => new Task(task));
   }
 
   // returns a new task by array of t_types
@@ -158,8 +142,8 @@ export class FullTask extends Task {
 
   constructor(task: OutTask, data: OutTaskRel) {
     super(task);
-    this.l_id = data.l_id;
     this.pa_id = data.pa_id;
+    this.l_id = data.l_id;
     this.u_id = data.u_id;
   }
 
@@ -183,7 +167,7 @@ export class FullTask extends Task {
   }
 
   static async getFull(
-    data: Partial<OutTask>,
+    data?: Partial<OutTask>,
     order?: Extract<keyof OutTask, string>[],
     limit?: number | null,
     desc?: boolean,
@@ -197,6 +181,10 @@ export class FullTask extends Task {
     return GeneralModel.parseOutput(tasks);
   }
 
+  static async getAll(order: Extract<keyof OutTask, string>[] = ["t_id"]) {
+    return this.getFull(undefined, order, null);
+  }
+
   static async getByRels(data: Partial<OutTaskRel>, limit?: number | null) {
     const output = await GeneralModel.getJoin<OutFullTask>(
       this.joinQuery,
@@ -207,18 +195,28 @@ export class FullTask extends Task {
     return GeneralModel.parseOutput(tasks, "Task Not Found");
   }
 
-  static async getByComplete(complete: boolean) {
+  static async getByComplete(
+    complete: boolean,
+    t_types?: TaskType[],
+    limit?: number,
+  ) {
     const query = `SELECT * FROM 
-    tasks a
-    LEFT JOIN taskRels b
-    ON a.t_id = b.t_id
+    ${this.joinQuery}
     LEFT JOIN o_t c
     ON a.t_id = c.t_id
     WHERE a.completed IS${complete ? " NOT" : ""} NULL
+    ${t_types ? "AND a.t_type = ANY($1)" : ""}
     ORDER BY a.placed
-    LIMIT 20;`;
-    const output = await db.query<OutFullTask>(query);
-    return output.rows.map((task) => new FullTask(task, task));
+    ${limit ? "LIMIT " + String(limit) : ""};`;
+    const { rows } = await db.query<OutFullTask & { o_id: number }>(
+      query,
+      t_types ? [t_types] : [],
+    );
+    return rows.map((task) => {
+      const fulltask = new FullTask(task, task);
+      fulltask.o_id = task.o_id;
+      return fulltask;
+    });
   }
 
   static async getRels(task: Task) {
@@ -227,5 +225,36 @@ export class FullTask extends Task {
     });
     const [rels] = GeneralModel.parseOutput(output);
     return new FullTask(task, rels);
+  }
+
+  static async getCurrentByUser(u_id: number, client?: PoolClient) {
+    const query = `
+      SELECT * FROM tasks a
+      JOIN taskRels b
+      ON a.t_id = b.t_id
+      WHERE b.u_id = $1
+      AND a.completed IS NULL;`;
+
+    const connection = client ?? db;
+
+    const {
+      rows: [taskData],
+    } = await connection.query<OutFullTask>(query, [u_id]);
+    return taskData ? new FullTask(taskData, taskData) : null;
+  }
+
+  static async getByLocation(l_id: number, limit: number = 1) {
+    const query = `
+    SELECT * from tasks a
+    JOIN taskRels b
+    ON a.t_id = b.t_id
+    WHERE b.l_id = $1
+    AND a.completed IS NULL
+    LIMIT ${String(limit)};`;
+
+    const {
+      rows: [taskData],
+    } = await db.query<OutFullTask>(query, [l_id]);
+    return taskData ? new FullTask(taskData, taskData) : null;
   }
 }

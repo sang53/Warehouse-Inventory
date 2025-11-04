@@ -9,7 +9,7 @@
       <div class="main">
         <h1>Pallet <%= pa_id %></h1>
         <h2>Created: <%= created %></h2>
-        <h2>Current Location: <%= l_name %></h2>
+        <h2>Current Location: <%= `${location.l_name} (l_id: ${location.l_id})` ?? "Floating" %></h2>
         <h1>Products</h1>
         <%- include("partials/table.ejs", { tableData: products }) %>
       </div>

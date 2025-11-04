@@ -1,32 +1,28 @@
 import type { NextFunction, Request, Response } from "express";
 import { FullTask } from "../models/tasksModel.ts";
-import { checkValidation, validateInt } from "../middlewares/validate.ts";
+import {
+  checkValidation,
+  validateInt,
+  validateOptionalInt,
+} from "../middlewares/validate.ts";
 import { matchedData } from "express-validator";
 import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
 import { completeTask } from "../services/tasks.ts";
-import {
-  AuthenticatedRequest,
-  ensureRole,
-} from "../middlewares/authenticate.ts";
+import { AuthenticatedRequest } from "../middlewares/authenticate.ts";
 import { ProductOrder } from "../models/ordersModel.ts";
 import mapToView from "../utils/mapToView.ts";
+import getTaskLocals from "../getLocals/getTaskLocals.ts";
+import User from "../models/usersModel.ts";
 
 export const tasksGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
-    const [incomplete, complete] = await Promise.all([
-      FullTask.getByComplete(false),
-      FullTask.getByComplete(true),
-    ]);
+    const tableData = await FullTask.getAll();
 
     res.locals = getDisplayLocals(
       [
         {
-          title: "Incomplete Tasks",
-          tableData: incomplete,
-        },
-        {
-          title: "Completed Tasks",
-          tableData: complete,
+          title: "All Tasks",
+          tableData,
         },
       ],
       { searchBar: true },
@@ -35,8 +31,59 @@ export const tasksGet = [
   },
 ];
 
+export const taskCompleteGet = [
+  async (_req: Request, res: Response, next: NextFunction) => {
+    const [inTask, pickTask, outTask] = await Promise.all([
+      FullTask.getByComplete(true, ["arrival", "intake", "storage"]),
+      FullTask.getByComplete(true, ["pick"]),
+      FullTask.getByComplete(true, ["outgoing", "export"]),
+    ]);
+
+    res.locals = getDisplayLocals([
+      {
+        title: "Incoming Tasks",
+        tableData: inTask,
+      },
+      {
+        title: "Picking Tasks",
+        tableData: pickTask,
+      },
+      {
+        title: "Outgoing Tasks",
+        tableData: outTask,
+      },
+    ]);
+    next();
+  },
+];
+
+export const taskIncompleteGet = [
+  async (_req: Request, res: Response, next: NextFunction) => {
+    const [inTask, pickTask, outTask] = await Promise.all([
+      FullTask.getByComplete(false, ["arrival", "intake", "storage"]),
+      FullTask.getByComplete(false, ["pick"]),
+      FullTask.getByComplete(false, ["outgoing", "export"]),
+    ]);
+
+    res.locals = getDisplayLocals([
+      {
+        title: "Incoming Tasks",
+        tableData: inTask,
+      },
+      {
+        title: "Picking Tasks",
+        tableData: pickTask,
+      },
+      {
+        title: "Outgoing Tasks",
+        tableData: outTask,
+      },
+    ]);
+    next();
+  },
+];
+
 export const tasksIDGet = [
-  ensureRole(),
   validateInt("id"),
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
@@ -47,31 +94,60 @@ export const tasksIDGet = [
       ProductOrder.getFull({ t_id: id }),
     ]);
 
-    res.locals = getDisplayLocals([
-      { title: `Task ${String(id)}`, tableData: tasks },
-      { title: `Order ${String(order.o_id)}`, tableData: [order] },
-      { title: "Products", tableData: mapToView(products) },
-    ]);
+    res.locals = getTaskLocals(
+      [
+        { title: `Task ${String(id)}`, tableData: tasks },
+        {
+          title: `Order ${String(order.o_id)}`,
+          tableData: [
+            {
+              ...order,
+              t_ids: order.t_ids?.join(", "),
+            },
+          ],
+        },
+        { title: "Products", tableData: mapToView(products) },
+      ],
+      id,
+    );
     next();
   },
 ];
 
 export const tasksIDPost = [
   validateInt("id"),
+  validateOptionalInt("u_id"),
   checkValidation,
+  // handle both cases: user self completing from /current or admin from /tasks/id/:id
   async (req: Request, res: Response) => {
-    const { id } = matchedData<{ id: number }>(req);
-    const [task] = await FullTask.getFull({ t_id: id });
-    const user = (req as AuthenticatedRequest).user;
+    const { id, u_id } = matchedData<{ id: number; u_id?: number }>(req);
 
+    const [task] = await FullTask.getFull({ t_id: id });
     // make sure task is valid
     if (task.completed) throw new Error(`Task ${String(id)} Already Completed`);
 
-    // make sure admin or assigned user
-    if (user.u_role !== "admin" && user.u_id !== task.u_id)
+    // designating user = self or admin
+    const currUser = (req as AuthenticatedRequest).user;
+    // designated user = self or designated by admin or admin self
+    const taskUser = u_id ? (await User.get({ u_id }))[0] : currUser;
+
+    // check valid designated user
+    if (!taskUser) throw new Error("Invalid user to complete task");
+
+    // check designated user is assigned or designating user is admin
+    if (taskUser.u_id !== task.u_id && currUser.u_role !== "admin")
       throw new Error("Permission Denied");
 
+    // if assigned user is not designated user, update db
+    if (task.u_id !== taskUser.u_id)
+      await Promise.all([
+        task.updateRels({ u_id: taskUser.u_id }),
+        task.setStart(true),
+      ]);
+
     await completeTask(task);
-    res.redirect("/current");
+    if (currUser.u_id === taskUser.u_id && currUser.u_role !== "admin")
+      res.redirect("/current");
+    else res.redirect(`/tasks/id/${String(id)}`);
   },
 ];

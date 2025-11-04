@@ -20,7 +20,7 @@ export async function removeFromStorage(
 
 export async function getProductInfo(
   products: Map<number, number>,
-  client: PoolClient,
+  client?: PoolClient,
 ) {
   const output = await Location.getByProducts(products, client);
   const data: typeof output = [];

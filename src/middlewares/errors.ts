@@ -8,17 +8,22 @@ function isValidationErrorArr(error: unknown): error is ValidationError[] {
 export function parseError(
   error: unknown,
   _req: Request,
-  _res: Response,
+  res: Response,
   next: NextFunction,
 ) {
-  if (error instanceof Error) next([error.message]);
-  else if (isValidationErrorArr(error))
-    next(
-      error.map((err) =>
-        typeof err.msg === "string" ? err.msg : "Unknown Validation Error",
-      ),
+  if (error instanceof Error) {
+    if (res.statusCode === 200) res.status(400);
+    next([error.message]);
+  } else if (isValidationErrorArr(error)) {
+    const err = error.map((err) =>
+      typeof err.msg === "string" ? err.msg : "Unknown Validation Error",
     );
-  else next(`Unknown system error: ${String(error)}`);
+    res.status(400);
+    next(err);
+  } else {
+    res.status(500);
+    next(`Unknown system error: ${String(error)}`);
+  }
 }
 
 export function renderErrorPage(
@@ -27,7 +32,6 @@ export function renderErrorPage(
   res: Response,
   _next: NextFunction,
 ) {
-  if (res.statusCode === 200) res.status(500);
   res.render("errorPage", {
     errors,
   });

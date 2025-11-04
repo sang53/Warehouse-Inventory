@@ -10,6 +10,17 @@
       <div class="main">
         <h1><%= title %></h1>
         <form action="<%= action %>" method="post">
+          <fieldset>
+            <legend>User Role:</legend>
+            <label for="admin">Admin:</label>
+            <input type="radio" name="u_role" id="admin" value="admin" required>
+            <label for="intake">Intake:</label>
+            <input type="radio" name="u_role" id="intake" value="intake" required>
+            <label for="picker">Picker:</label>
+            <input type="radio" name="u_role" id="picker" value="picker" required>
+            <label for="outgoing">Outgoing:</label>
+            <input type="radio" name="u_role" id="outgoing" value="outgoing" required>
+          </fieldset>
           <% formData.forEach((field, idx) => { %>
             <label for="<%= `input-${idx}` %>"><%= field.text %></label>
             <input id="<%= `input-${idx}` %>" 

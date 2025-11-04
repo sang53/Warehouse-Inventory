@@ -75,16 +75,17 @@ const formFields = {
       ...NAME_FIELD,
     },
     {
-      text: "Password (Must be alphanumeric)",
+      text: "Password",
       name: "password",
       type: "password",
+      placeholder: "Must be AlphaNum",
       required: true,
     },
     {
-      text: "Role",
-      name: "u_role",
-      ...NAME_FIELD,
-      placeholder: "intake | storage | outgoing",
+      text: "Confirm Password",
+      name: "passwordConfirm",
+      type: "password",
+      required: true,
     },
   ],
 } as const;

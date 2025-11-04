@@ -16,7 +16,7 @@ export default async function <T, R>(
   } catch (err) {
     await client.query("ROLLBACK");
     console.error(err);
-    throw new Error("System Error - Please Try Again");
+    throw err;
   } finally {
     client.release();
   }

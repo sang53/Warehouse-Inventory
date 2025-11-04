@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import passport from "passport";
 import { AuthenticatedRequest } from "../middlewares/authenticate.ts";
-import { getCurrentTask } from "../services/tasks.ts";
+import { FullTask } from "../models/tasksModel.ts";
 
 export const loginGet = [
   (req: Request, res: Response) => {
@@ -37,7 +37,7 @@ export const loginPost = [
 export const logoutGet = [
   async (req: Request, res: Response) => {
     const user = (req as AuthenticatedRequest).user;
-    const task = await getCurrentTask(user, false);
+    const task = await FullTask.getCurrentByUser(user.u_id);
 
     if (task) await task.cancelTask();
     req.logOut(() => {

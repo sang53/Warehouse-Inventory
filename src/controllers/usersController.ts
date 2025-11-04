@@ -4,27 +4,44 @@ import {
   checkValidation,
   validateAlphaNum,
   validateInt,
+  validatePassword,
+  validateURole,
 } from "../middlewares/validate.ts";
-import { body, matchedData } from "express-validator";
+import { matchedData } from "express-validator";
 import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
-import getFormLocals from "../getLocals/getFormLocals.ts";
 import getUserLocals from "../getLocals/getUserLocals.ts";
-import { getCurrentTask } from "../services/tasks.ts";
 import { ensureRole } from "../middlewares/authenticate.ts";
+import getUserForm from "../getLocals/getUserForm.ts";
+import { FullTask } from "../models/tasksModel.ts";
+import extractKeys from "../utils/extractKeys.ts";
+import Order from "../models/ordersModel.ts";
 
 export const usersGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
     const users = await User.getAll();
+    const userData = await Promise.all(
+      users.map(async (user) => addCurrentTaskOrder(user)),
+    );
     res.locals = getDisplayLocals(
       [
         {
           title: "All Users",
-          tableData: users,
+          tableData: userData,
         },
       ],
       { searchBar: true, addBtn: true },
     );
     next();
+
+    async function addCurrentTaskOrder(user: User) {
+      const plainUser = extractKeys(user, ["u_id", "u_name", "u_role"]);
+
+      const task = await FullTask.getCurrentByUser(user.u_id);
+      if (!task) return { ...plainUser, t_id: null, o_id: null } as const;
+
+      const { o_id } = await Order.getByTask(task.t_id);
+      return { ...plainUser, t_id: task.t_id, o_id } as const;
+    }
   },
 ];
 
@@ -38,11 +55,14 @@ export const usersIDGet = [
     const [user] = await User.get({ u_id: id });
     if (!user) throw new Error(`User ${String(id)} Not Found`);
 
-    // retrieve current task
-    const task = await getCurrentTask(user);
-    const t_id = task?.t_id ?? null;
+    // retrieve previous tasks
+    const tasks = await FullTask.getByRels({ u_id: id }, null);
 
-    res.locals = getUserLocals({ user, t_id });
+    // retrieve current task
+    const currentTask = await FullTask.getCurrentByUser(user.u_id);
+    const t_id = currentTask ? currentTask.t_id : null;
+
+    res.locals = getUserLocals({ user, t_id, tasks });
     next();
   },
 ];
@@ -50,11 +70,7 @@ export const usersIDGet = [
 export const usersNewGet = [
   ensureRole(),
   (_req: Request, res: Response, next: NextFunction) => {
-    res.locals = getFormLocals({
-      title: "New User",
-      action: "/users/new",
-      field: "USERS",
-    });
+    res.locals = getUserForm();
     next();
   },
 ];
@@ -63,12 +79,16 @@ export const usersNewPost = [
   ensureRole(),
   validateAlphaNum("u_name"),
   validateAlphaNum("username"),
-  validateAlphaNum("u_role"),
-  body("u_role").isIn(["admin", "intake", "picker", "outgoing"]),
+  ...validatePassword(),
+  ...validateURole(),
   checkValidation,
   async (req: Request, res: Response) => {
-    const userData = matchedData<InUser>(req);
-    await User.create(userData);
-    res.redirect(`/users`);
+    const { passwordConfirm, ...userData } = matchedData<
+      InUser & { passwordConfirm: string }
+    >(req);
+    if (passwordConfirm !== userData.password)
+      throw new Error("Passwords must match");
+    const user = await User.create(userData);
+    res.redirect(`/users/id/${String(user.u_id)}`);
   },
 ];

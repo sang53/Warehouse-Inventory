@@ -10,7 +10,7 @@ export async function resetTables() {
     await client.query(`TRUNCATE ${Object.values(TNAMES).join(", ")} CASCADE;`);
     await client.query("COMMIT");
   } catch (err) {
-    console.log(err);
+    console.error(err);
     await client.query("ROLLBACK");
   } finally {
     client.release();

@@ -21,8 +21,8 @@ export default class User {
 
   constructor(data: OutUser) {
     this.u_id = data.u_id;
-    this.u_role = data.u_role;
     this.u_name = data.u_name;
+    this.u_role = data.u_role;
   }
 
   static async get(data: Partial<OutUser>, limit?: number | null) {
@@ -34,7 +34,7 @@ export default class User {
   }
 
   static async getAll() {
-    const output = await GeneralModel.get("users", { limit: 50 });
+    const output = await GeneralModel.get("users", { limit: null });
     return output.map((user) => new User(user));
   }
 

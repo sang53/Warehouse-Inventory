@@ -1,9 +1,9 @@
-interface DisplayLocals {
+export interface DisplayLocals {
   title: string;
   tableData: object[];
 }
 
-interface DisplayOptions {
+export interface DisplayOptions {
   searchBar?: boolean;
   addBtn?: boolean;
 }

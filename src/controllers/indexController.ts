@@ -26,7 +26,6 @@ export const indexGet = [
         tableData: outOrders,
       },
     ]);
-
     next();
   },
 ];
@@ -42,7 +41,7 @@ export const currentGet = [
     }
 
     // get task or assign oldest available task
-    const task = await getCurrentTask(user, true);
+    const task = await getCurrentTask(user);
     if (task === null)
       throw new Error("No available tasks - report to team leader");
 
@@ -59,10 +58,11 @@ export const currentGet = [
     // get product information of order
     const fullOrder = await ProductOrder.getFull({ t_id: task.t_id });
 
-    res.locals = getCurrentLocals({
+    res.locals = await getCurrentLocals({
       l_name,
       user,
       task,
+      o_id: fullOrder.o_id,
       products: fullOrder.products,
     });
     next();

@@ -14,20 +14,9 @@ const LTYPEMAP = {
   pick: "outgoing",
 } as const;
 
-export async function getCurrentTask(
-  user: User,
-  start: boolean = true,
-  client?: PoolClient,
-) {
-  try {
-    // if task already assigned to user
-    const [task] = await FullTask.getByRels({ u_id: user.u_id });
-    return task;
-  } catch {
-    // if only retrieving current task:
-    // return if no task assigned
-    if (!start) return null;
-  }
+export async function getCurrentTask(user: User, client?: PoolClient) {
+  const currentTask = await FullTask.getCurrentByUser(user.u_id, client);
+  if (currentTask) return currentTask;
 
   const USER_TASK_MAP: Record<UserType, TaskType[]> = {
     intake: ["arrival", "intake", "storage"],
@@ -76,7 +65,8 @@ async function internalCompleteTask(client: PoolClient, task: FullTask) {
     // add products to pallet
     const productStocks = mapToProductStock(fullOrder.products, task.pa_id);
     await ProductPallet.modifyProducts(productStocks, client, "+");
-  } else if (needsLocation(task.t_type))
+  }
+  if (needsLocation(task.t_type))
     // if pallet was moved new location:
     // remove pallet from old location & move pallet to new location
     await Location.movePallet(task.pa_id, task.l_id, client);

@@ -30,8 +30,8 @@ export default class Location {
   constructor(data: OutLocation) {
     this.l_id = data.l_id;
     this.l_name = data.l_name;
-    this.pa_id = data.pa_id;
     this.l_role = data.l_role;
+    this.pa_id = data.pa_id;
   }
 
   static async create(data: InLocation, client?: PoolClient) {
@@ -57,7 +57,10 @@ export default class Location {
   }
 
   static async getAll() {
-    const output = await GeneralModel.get("locations", { limit: null });
+    const output = await GeneralModel.get("locations", {
+      limit: null,
+      order: ["l_name"],
+    });
     return output.map((location) => new Location(location));
   }
 

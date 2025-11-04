@@ -51,7 +51,6 @@ export default (function () {
       : "DEFAULT VALUES";
     const query = `INSERT INTO ${table} ${queryValues} RETURNING *;`;
     const values = getValues(data, false);
-
     const output = await connection.query<TableOutputs[TName]>(query, values);
     return parseOutput(output.rows)[0];
   }

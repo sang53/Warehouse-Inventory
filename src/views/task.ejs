@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Warehouse Inventory</title>
+  </head>
+  <body>
+    <%- include ("partials/header.ejs") %>
+    <div>
+      <%- include ("partials/search.ejs") %>
+      <%- include ("partials/addBtn.ejs") %>
+    </div>
+    <div class="main">
+      <form action="/tasks/id/<%= t_id %>" method="post">
+        <label for="u_id">User ID:</label>
+        <input type="number" name="u_id" id="u_id" autofocus placeholder="Leave empty for self">
+        <button type="submit">Set Complete (admin only)</button>
+      </form>
+      <% tables.forEach(({title, tableData}) => { %>
+        <h1><%= title %></h1>
+        <%- include("partials/table.ejs", { tableData }) %>
+      <% }) %>
+    </div>
+  </body>
+</html>

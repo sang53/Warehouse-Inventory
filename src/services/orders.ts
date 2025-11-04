@@ -24,9 +24,8 @@ async function interalCreateOrder(
     stock,
   }: { o_type: OrderType; products: number[]; stock: number[] },
 ) {
-  const task = await createFirstTask(o_type, client);
-
   await validateProducts(products, client);
+  const task = await createFirstTask(o_type, client);
 
   // create order & link task
   const order = await ProductOrder.create(

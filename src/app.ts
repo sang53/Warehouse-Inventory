@@ -23,7 +23,7 @@ const app = express();
 // view engine setup & body parser
 app.set("views", path.join(import.meta.dirname, "views"));
 app.set("view engine", "ejs");
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 
 // connect-pg-simple
 const PgSession = connectPgSimple(session);

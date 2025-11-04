@@ -13,24 +13,57 @@ import mapToView from "../utils/mapToView.ts";
 
 export const ordersGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
-    const [incoming, outgoing] = await Promise.all([
-      Order.getByComplete(true, "IN"),
-      Order.getByComplete(true, "OUT"),
-    ]);
+    const orders = await Order.getAll();
 
     res.locals = getDisplayLocals(
       [
         {
-          title: "Completed Incoming Orders",
-          tableData: incoming,
-        },
-        {
-          title: "Completed Outgoing Orders",
-          tableData: outgoing,
+          title: "All Orders",
+          tableData: orders.map((order) => order.getTable()),
         },
       ],
       { searchBar: true, addBtn: true },
     );
+    next();
+  },
+];
+
+export const ordersCompleteGet = [
+  async (_req: Request, res: Response, next: NextFunction) => {
+    const [inOrders, outOrders] = await Promise.all([
+      Order.getByComplete(true, "IN"),
+      Order.getByComplete(true, "OUT"),
+    ]);
+    res.locals = getDisplayLocals([
+      {
+        title: "Incoming Orders",
+        tableData: inOrders.map((order) => order.getTable()),
+      },
+      {
+        title: "Outgoing Orders",
+        tableData: outOrders.map((order) => order.getTable()),
+      },
+    ]);
+    next();
+  },
+];
+
+export const ordersIncompleteGet = [
+  async (_req: Request, res: Response, next: NextFunction) => {
+    const [inOrders, outOrders] = await Promise.all([
+      Order.getByComplete(false, "IN"),
+      Order.getByComplete(false, "OUT"),
+    ]);
+    res.locals = getDisplayLocals([
+      {
+        title: "Incoming Orders",
+        tableData: inOrders.map((order) => order.getTable()),
+      },
+      {
+        title: "Outgoing Orders",
+        tableData: outOrders.map((order) => order.getTable()),
+      },
+    ]);
     next();
   },
 ];
@@ -42,7 +75,7 @@ export const ordersNewGet = [
 ];
 
 export const ordersNewPost = [
-  validateOType(),
+  ...validateOType(),
   ...validateIntArr("products"),
   ...validateIntArr("stock"),
   checkValidation,
@@ -60,7 +93,7 @@ export const ordersNewPost = [
     const parsedStock = stock.map((stock) => Number.parseInt(stock));
 
     const { order } = await createOrder(o_type, parsedProducts, parsedStock);
-    res.redirect(`/orders/${String(order.o_id)}`);
+    res.redirect(`/orders/id/${String(order.o_id)}`);
   },
 ];
 
@@ -73,7 +106,10 @@ export const ordersIDGet = [
     const { products, ...order } = await ProductOrder.getFull({ o_id: id });
 
     res.locals = getDisplayLocals([
-      { title: `Order ${String(id)}`, tableData: [order] },
+      {
+        title: `Order ${String(id)}`,
+        tableData: [{ ...order, t_ids: order.t_ids?.join(", ") }],
+      },
       { title: "Products", tableData: mapToView(products) },
     ]);
     next();

@@ -27,12 +27,17 @@ export const palletsIDGet = [
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
 
-    const [pallet, [{ l_name }]] = await Promise.all([
+    const [palletData, locationData] = await Promise.allSettled([
       ProductPallet.get({ pa_id: id }),
       Location.get({ pa_id: id }),
     ]);
 
-    res.locals = getPalletLocals({ pallet, l_name });
+    if (palletData.status === "rejected")
+      throw new Error(`Pallet ${String(id)} not found`);
+    const location =
+      locationData.status === "fulfilled" ? locationData.value[0] : null;
+
+    res.locals = getPalletLocals({ pallet: palletData.value, location });
     next();
   },
 ];

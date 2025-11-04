@@ -7,13 +7,13 @@ import { initData } from "./initData.ts";
 try {
   await dropTables();
 } catch (err) {
-  console.log("Previous tables not found");
+  console.error("Previous tables not found");
   console.error(err);
 }
 try {
   await dropTypes();
 } catch (err) {
-  console.log("Previous types not found");
+  console.error("Previous types not found");
   console.error(err);
 }
 await createTypes();

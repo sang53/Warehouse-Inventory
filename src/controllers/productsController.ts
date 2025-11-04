@@ -12,19 +12,11 @@ import { ensureRole } from "../middlewares/authenticate.ts";
 
 export const productsGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
-    const [id, net] = await Promise.all([
-      Product.getAllStock("sub.p_id", 50),
-      Product.getAllStock("net_stock"),
-    ]);
     res.locals = getDisplayLocals(
       [
         {
-          title: "Products by Net Stock",
-          tableData: net,
-        },
-        {
           title: "All Products",
-          tableData: id,
+          tableData: await Product.getAllStock("net_stock"),
         },
       ],
       { searchBar: true, addBtn: true },
@@ -52,7 +44,7 @@ export const productsNewPost = [
   async (req: Request, res: Response) => {
     const { p_name } = matchedData<{ p_name: string }>(req);
     const product = await Product.create({ p_name });
-    res.redirect(`/products/${String(product.p_id)}`);
+    res.redirect(`/products/id/${String(product.p_id)}`);
   },
 ];
 
@@ -61,12 +53,31 @@ export const productsIDGet = [
   checkValidation,
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = matchedData<{ id: number }>(req);
-    const product = await Product.getStockByProduct(id);
+    const [product, palletsLocations] = await Promise.all([
+      Product.getStockByProduct(id),
+      Product.getPalletLocation(id),
+    ]);
+
+    const inLocations = palletsLocations.filter(({ l_id }) => l_id);
+    const offLocations = palletsLocations
+      .filter(({ l_id }) => !l_id)
+      .map(({ pa_id, stock }) => ({
+        pa_id,
+        stock,
+      }));
 
     res.locals = getDisplayLocals([
       {
         title: `Product ${String(product.p_id)}`,
         tableData: [product],
+      },
+      {
+        title: "Stock In Locations",
+        tableData: inLocations,
+      },
+      {
+        title: "Floating Stock",
+        tableData: offLocations,
       },
     ]);
     next();

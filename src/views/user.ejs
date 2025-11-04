@@ -10,6 +10,8 @@
         <h1>User <%= user.u_id %> Details</h1>
         <%- include("partials/table.ejs", { tableData: [user] }) %>
         <h1>Current Task: <%= t_id ?? "None" %></h1>
+        <h1>Previous Tasks:</h1>
+        <%- include("partials/table.ejs", { tableData: tasks }) %>
       </div>
     </body>
   </head>
