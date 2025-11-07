@@ -1,9 +1,9 @@
 import { PoolClient } from "pg";
-import Location from "../models/locationsModel.ts";
-import Order, { OrderType, ProductOrder } from "../models/ordersModel.ts";
-import Pallet, { ProductPallet } from "../models/palletsModel.ts";
-import { FullTask } from "../models/tasksModel.ts";
-import transaction from "../utils/transaction.ts";
+import Location from "../models/locationsModel.js";
+import Order, { OrderType, ProductOrder } from "../models/ordersModel.js";
+import Pallet, { ProductPallet } from "../models/palletsModel.js";
+import { FullTask } from "../models/tasksModel.js";
+import transaction from "../utils/transaction.js";
 
 export async function createOrder(
   o_type: OrderType,

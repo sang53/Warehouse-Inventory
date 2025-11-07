@@ -1,19 +1,19 @@
 import type { NextFunction, Request, Response } from "express";
-import { FullTask } from "../models/tasksModel.ts";
+import { FullTask } from "../models/tasksModel.js";
 import {
   checkValidation,
   validateInt,
   validateOptionalInt,
-} from "../middlewares/validate.ts";
+} from "../middlewares/validate.js";
 import { matchedData } from "express-validator";
-import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
-import { completeTask } from "../services/tasks.ts";
-import { AuthenticatedRequest } from "../middlewares/authenticate.ts";
-import { ProductOrder } from "../models/ordersModel.ts";
-import mapToView from "../utils/mapToView.ts";
-import getTaskLocals from "../getLocals/getTaskLocals.ts";
-import User from "../models/usersModel.ts";
-import extractKeys from "../utils/extractKeys.ts";
+import getDisplayLocals from "../getLocals/getDisplayLocals.js";
+import { completeTask } from "../services/tasks.js";
+import { AuthenticatedRequest } from "../middlewares/authenticate.js";
+import { ProductOrder } from "../models/ordersModel.js";
+import mapToView from "../utils/mapToView.js";
+import getTaskLocals from "../getLocals/getTaskLocals.js";
+import User from "../models/usersModel.js";
+import extractKeys from "../utils/extractKeys.js";
 
 export const tasksGet = [
   async (_req: Request, res: Response, next: NextFunction) => {

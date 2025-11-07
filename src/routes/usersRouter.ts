@@ -4,7 +4,7 @@ import {
   usersIDGet,
   usersNewGet,
   usersNewPost,
-} from "../controllers/usersController.ts";
+} from "../controllers/usersController.js";
 
 const usersRouter = Router();
 

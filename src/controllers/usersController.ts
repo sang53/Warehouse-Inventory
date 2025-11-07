@@ -1,20 +1,20 @@
 import type { NextFunction, Request, Response } from "express";
-import User, { InUser } from "../models/usersModel.ts";
+import User, { InUser } from "../models/usersModel.js";
 import {
   checkValidation,
   validateAlphaNum,
   validateInt,
   validatePassword,
   validateURole,
-} from "../middlewares/validate.ts";
+} from "../middlewares/validate.js";
 import { matchedData } from "express-validator";
-import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
-import getUserLocals from "../getLocals/getUserLocals.ts";
-import { ensureRole } from "../middlewares/authenticate.ts";
-import getUserForm from "../getLocals/getUserForm.ts";
-import { FullTask } from "../models/tasksModel.ts";
-import extractKeys from "../utils/extractKeys.ts";
-import Order from "../models/ordersModel.ts";
+import getDisplayLocals from "../getLocals/getDisplayLocals.js";
+import getUserLocals from "../getLocals/getUserLocals.js";
+import { ensureRole } from "../middlewares/authenticate.js";
+import getUserForm from "../getLocals/getUserForm.js";
+import { FullTask } from "../models/tasksModel.js";
+import extractKeys from "../utils/extractKeys.js";
+import Order from "../models/ordersModel.js";
 
 export const usersGet = [
   async (_req: Request, res: Response, next: NextFunction) => {

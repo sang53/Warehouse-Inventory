@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import User, { UserType } from "../models/usersModel.ts";
+import User, { UserType } from "../models/usersModel.js";
 
 export interface AuthenticatedRequest extends Request {
   user: User;

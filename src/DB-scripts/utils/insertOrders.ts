@@ -1,6 +1,6 @@
 import { PoolClient } from "pg";
-import { createOrder } from "../../services/orders.ts";
-import randInt from "./randInt.ts";
+import { createOrder } from "../../services/orders.js";
+import randInt from "./randInt.js";
 
 const numOrders = 10 as const;
 const maxProducts = 5;

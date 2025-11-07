@@ -1,5 +1,5 @@
-import tableSchema from "../../config/tableSchema.ts";
-import db from "../../config/pool.ts";
+import tableSchema from "../../config/tableSchema.js";
+import db from "../../config/pool.js";
 
 export async function createTypes() {
   const client = await db.connect();

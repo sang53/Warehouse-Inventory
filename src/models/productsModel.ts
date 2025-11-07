@@ -1,8 +1,8 @@
-import GeneralModel from "./generalModel.ts";
-import db from "../config/pool.ts";
+import GeneralModel from "./generalModel.js";
+import db from "../config/pool.js";
 import { PoolClient } from "pg";
-import { ProductStock } from "./palletsModel.ts";
-import { OutLocation } from "./locationsModel.ts";
+import { ProductStock } from "./palletsModel.js";
+import { OutLocation } from "./locationsModel.js";
 
 export interface InProduct {
   p_name: string;

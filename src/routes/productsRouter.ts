@@ -4,7 +4,7 @@ import {
   productsIDGet,
   productsNewGet,
   productsNewPost,
-} from "../controllers/productsController.ts";
+} from "../controllers/productsController.js";
 
 const productsRouter = Router();
 

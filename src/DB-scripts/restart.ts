@@ -1,8 +1,8 @@
-import { createTables } from "./utils/createTables.ts";
-import { dropTables } from "./utils/dropTables.ts";
-import { dropTypes } from "./utils/dropTypes.ts";
-import { createTypes } from "./utils/createTypes.ts";
-import { initData } from "./initData.ts";
+import { createTables } from "./utils/createTables.js";
+import { dropTables } from "./utils/dropTables.js";
+import { dropTypes } from "./utils/dropTypes.js";
+import { createTypes } from "./utils/createTypes.js";
+import { initData } from "./initData.js";
 
 try {
   await dropTables();

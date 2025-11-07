@@ -1,15 +1,15 @@
 import type { NextFunction, Request, Response } from "express";
-import Order, { ProductOrder } from "../models/ordersModel.ts";
+import Order, { ProductOrder } from "../models/ordersModel.js";
 import {
   checkValidation,
   validateInt,
   validateIntArr,
   validateOType,
-} from "../middlewares/validate.ts";
+} from "../middlewares/validate.js";
 import { matchedData } from "express-validator";
-import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
-import { createOrder } from "../services/orders.ts";
-import mapToView from "../utils/mapToView.ts";
+import getDisplayLocals from "../getLocals/getDisplayLocals.js";
+import { createOrder } from "../services/orders.js";
+import mapToView from "../utils/mapToView.js";
 
 export const ordersGet = [
   async (_req: Request, res: Response, next: NextFunction) => {

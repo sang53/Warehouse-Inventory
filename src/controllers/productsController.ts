@@ -1,14 +1,14 @@
 import type { NextFunction, Request, Response } from "express";
-import Product from "../models/productsModel.ts";
+import Product from "../models/productsModel.js";
 import { matchedData } from "express-validator";
 import {
   checkValidation,
   validateAlphaNum,
   validateInt,
-} from "../middlewares/validate.ts";
-import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
-import getFormLocals from "../getLocals/getFormLocals.ts";
-import { ensureRole } from "../middlewares/authenticate.ts";
+} from "../middlewares/validate.js";
+import getDisplayLocals from "../getLocals/getDisplayLocals.js";
+import getFormLocals from "../getLocals/getFormLocals.js";
+import { ensureRole } from "../middlewares/authenticate.js";
 
 export const productsGet = [
   async (_req: Request, res: Response, next: NextFunction) => {

@@ -1,6 +1,6 @@
-import Location from "../models/locationsModel.ts";
-import { ProductPallet } from "../models/palletsModel.ts";
-import mapToView from "../utils/mapToView.ts";
+import Location from "../models/locationsModel.js";
+import { ProductPallet } from "../models/palletsModel.js";
+import mapToView from "../utils/mapToView.js";
 
 interface PalletLocals {
   pallet: ProductPallet;

@@ -1,5 +1,5 @@
 import { PoolClient } from "pg";
-import GeneralModel from "./generalModel.ts";
+import GeneralModel from "./generalModel.js";
 import * as argon2 from "argon2";
 
 export interface InUser {

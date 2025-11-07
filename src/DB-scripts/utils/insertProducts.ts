@@ -1,5 +1,5 @@
 import { PoolClient } from "pg";
-import Product from "../../models/productsModel.ts";
+import Product from "../../models/productsModel.js";
 
 const testProducts = [
   "Victoria Bitter",

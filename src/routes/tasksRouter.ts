@@ -5,7 +5,7 @@ import {
   tasksGet,
   tasksIDGet,
   tasksIDPost,
-} from "../controllers/tasksController.ts";
+} from "../controllers/tasksController.js";
 
 const tasksRouter = Router();
 

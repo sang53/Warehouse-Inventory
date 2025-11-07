@@ -1,7 +1,7 @@
-import Pallet, { ProductPallet } from "../../models/palletsModel.ts";
-import Location from "../../models/locationsModel.ts";
+import Pallet, { ProductPallet } from "../../models/palletsModel.js";
+import Location from "../../models/locationsModel.js";
 import { PoolClient } from "pg";
-import randInt from "./randInt.ts";
+import randInt from "./randInt.js";
 
 interface ProductStock {
   p_id: number;

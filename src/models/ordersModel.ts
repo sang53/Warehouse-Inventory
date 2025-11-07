@@ -1,7 +1,7 @@
-import GeneralModel from "./generalModel.ts";
-import db from "../config/pool.ts";
+import GeneralModel from "./generalModel.js";
+import db from "../config/pool.js";
 import { PoolClient } from "pg";
-import extractKeys from "../utils/extractKeys.ts";
+import extractKeys from "../utils/extractKeys.js";
 
 export interface InOrder {
   o_type: OrderType;

@@ -1,5 +1,5 @@
-import { FullTask } from "../models/tasksModel.ts";
-import User from "../models/usersModel.ts";
+import { FullTask } from "../models/tasksModel.js";
+import User from "../models/usersModel.js";
 
 interface UserLocals {
   user: User;

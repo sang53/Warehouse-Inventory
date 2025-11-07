@@ -1,8 +1,8 @@
 import { PoolClient } from "pg";
-import insertOrders from "./insertOrders.ts";
-import progressOrders from "./progressOrders.ts";
-import User from "../../models/usersModel.ts";
-import randInt from "./randInt.ts";
+import insertOrders from "./insertOrders.js";
+import progressOrders from "./progressOrders.js";
+import User from "../../models/usersModel.js";
+import randInt from "./randInt.js";
 
 const maxIterations = 5;
 

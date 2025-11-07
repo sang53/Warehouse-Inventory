@@ -1,5 +1,5 @@
-import db from "../../config/pool.ts";
-import tableSchema from "../../config/tableSchema.ts";
+import db from "../../config/pool.js";
+import tableSchema from "../../config/tableSchema.js";
 
 export async function dropTables() {
   const TNAMES = Object.keys(tableSchema.TABLES);

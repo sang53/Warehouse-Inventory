@@ -1,4 +1,4 @@
-import Location from "../models/locationsModel.ts";
+import Location from "../models/locationsModel.js";
 
 interface LocationLocals {
   location: Location;

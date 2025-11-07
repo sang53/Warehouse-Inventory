@@ -1,11 +1,11 @@
-import db from "../config/pool.ts";
+import db from "../config/pool.js";
 import { PoolClient } from "pg";
-import { InLocation, OutLocation } from "./locationsModel.ts";
-import { OrderType, OutOrder } from "./ordersModel.ts";
-import { OutPallet, ProductStock } from "./palletsModel.ts";
-import { InProduct, OutProduct } from "./productsModel.ts";
-import { InUser, OutUser } from "./usersModel.ts";
-import { InTask, InTaskRel, OutTask, OutTaskRel } from "./tasksModel.ts";
+import { InLocation, OutLocation } from "./locationsModel.js";
+import { OrderType, OutOrder } from "./ordersModel.js";
+import { OutPallet, ProductStock } from "./palletsModel.js";
+import { InProduct, OutProduct } from "./productsModel.js";
+import { InUser, OutUser } from "./usersModel.js";
+import { InTask, InTaskRel, OutTask, OutTaskRel } from "./tasksModel.js";
 
 interface TableInputs {
   products: InProduct;

@@ -1,5 +1,5 @@
 import { PoolClient } from "pg";
-import Location from "../../models/locationsModel.ts";
+import Location from "../../models/locationsModel.js";
 
 const HEIGHT = 9;
 const WIDTH = 9;

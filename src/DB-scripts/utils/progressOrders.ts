@@ -1,7 +1,7 @@
 import { PoolClient } from "pg";
-import User from "../../models/usersModel.ts";
-import { completeTask, getCurrentTask } from "../../services/tasks.ts";
-import randInt from "./randInt.ts";
+import User from "../../models/usersModel.js";
+import { completeTask, getCurrentTask } from "../../services/tasks.js";
+import randInt from "./randInt.js";
 
 const MAX_TASKS = 20;
 

@@ -1,6 +1,6 @@
 import { PoolClient } from "pg";
-import Location from "../models/locationsModel.ts";
-import { ProductPallet } from "../models/palletsModel.ts";
+import Location from "../models/locationsModel.js";
+import { ProductPallet } from "../models/palletsModel.js";
 
 export async function removeFromStorage(
   products: Map<number, number>,

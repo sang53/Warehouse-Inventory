@@ -3,7 +3,7 @@ import {
   loginGet,
   loginPost,
   logoutGet,
-} from "../controllers/authenticateController.ts";
+} from "../controllers/authenticateController.js";
 
 const authenticateRouter = Router();
 

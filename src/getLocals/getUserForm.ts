@@ -1,4 +1,4 @@
-import getFormLocals from "./getFormLocals.ts";
+import getFormLocals from "./getFormLocals.js";
 
 export default function () {
   const { viewData } = getFormLocals({

@@ -1,12 +1,12 @@
 import { PoolClient } from "pg";
-import Location from "../models/locationsModel.ts";
-import Order, { ProductOrder } from "../models/ordersModel.ts";
-import { ProductPallet } from "../models/palletsModel.ts";
-import Task, { FullTask, OutTaskRel, TaskType } from "../models/tasksModel.ts";
-import User, { UserType } from "../models/usersModel.ts";
-import { completeOrder } from "./orders.ts";
-import { mapToProductStock, removeFromStorage } from "./stock.ts";
-import transaction from "../utils/transaction.ts";
+import Location from "../models/locationsModel.js";
+import Order, { ProductOrder } from "../models/ordersModel.js";
+import { ProductPallet } from "../models/palletsModel.js";
+import Task, { FullTask, OutTaskRel, TaskType } from "../models/tasksModel.js";
+import User, { UserType } from "../models/usersModel.js";
+import { completeOrder } from "./orders.js";
+import { mapToProductStock, removeFromStorage } from "./stock.js";
+import transaction from "../utils/transaction.js";
 
 const LTYPEMAP = {
   arrival: "intake",

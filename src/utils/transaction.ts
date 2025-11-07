@@ -1,5 +1,5 @@
 import { PoolClient } from "pg";
-import db from "../config/pool.ts";
+import db from "../config/pool.js";
 
 // wraps a given functionn in a transaction
 export default async function <T, R>(

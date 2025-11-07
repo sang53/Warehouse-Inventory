@@ -1,5 +1,5 @@
-import { initData } from "./initData.ts";
-import { resetTables } from "./utils/resetTables.ts";
+import { initData } from "./initData.js";
+import { resetTables } from "./utils/resetTables.js";
 
 await resetTables();
 await initData();

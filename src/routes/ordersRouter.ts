@@ -6,7 +6,7 @@ import {
   ordersIncompleteGet,
   ordersNewGet,
   ordersNewPost,
-} from "../controllers/ordersController.ts";
+} from "../controllers/ordersController.js";
 
 const ordersRouter = Router();
 

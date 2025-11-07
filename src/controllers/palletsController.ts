@@ -1,10 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
-import Pallet, { ProductPallet } from "../models/palletsModel.ts";
+import Pallet, { ProductPallet } from "../models/palletsModel.js";
 import { matchedData } from "express-validator";
-import { checkValidation, validateInt } from "../middlewares/validate.ts";
-import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
-import { getPalletLocals } from "../getLocals/getPalletLocals.ts";
-import Location from "../models/locationsModel.ts";
+import { checkValidation, validateInt } from "../middlewares/validate.js";
+import getDisplayLocals from "../getLocals/getDisplayLocals.js";
+import { getPalletLocals } from "../getLocals/getPalletLocals.js";
+import Location from "../models/locationsModel.js";
 
 export const palletsGet = [
   async (_req: Request, res: Response, next: NextFunction) => {

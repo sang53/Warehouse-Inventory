@@ -1,8 +1,8 @@
-import { FullTask } from "../models/tasksModel.ts";
-import User from "../models/usersModel.ts";
-import { getProductInfo } from "../services/stock.ts";
-import extractKeys from "../utils/extractKeys.ts";
-import mapToView from "../utils/mapToView.ts";
+import { FullTask } from "../models/tasksModel.js";
+import User from "../models/usersModel.js";
+import { getProductInfo } from "../services/stock.js";
+import extractKeys from "../utils/extractKeys.js";
+import mapToView from "../utils/mapToView.js";
 
 interface CurrentLocals {
   user: User;

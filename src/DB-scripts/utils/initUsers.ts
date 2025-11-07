@@ -1,5 +1,5 @@
 import { PoolClient } from "pg";
-import User from "../../models/usersModel.ts";
+import User from "../../models/usersModel.js";
 
 const USER_TYPES = ["admin", "intake", "picker", "outgoing"] as const;
 const USERS = [

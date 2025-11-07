@@ -1,9 +1,9 @@
-import initLocations from "./utils/initLocations.ts";
-import initUsers from "./utils/initUsers.ts";
-import insertProducts from "./utils/insertProducts.ts";
-import insertStorage from "./utils/insertStorage.ts";
-import db from "../config/pool.ts";
-import initOrdersTasks from "./utils/initOrdersTasks.ts";
+import initLocations from "./utils/initLocations.js";
+import initUsers from "./utils/initUsers.js";
+import insertProducts from "./utils/insertProducts.js";
+import insertStorage from "./utils/insertStorage.js";
+import db from "../config/pool.js";
+import initOrdersTasks from "./utils/initOrdersTasks.js";
 
 export async function initData() {
   const client = await db.connect();

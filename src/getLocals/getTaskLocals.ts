@@ -1,7 +1,7 @@
 import getDisplayLocals, {
   DisplayLocals,
   DisplayOptions,
-} from "./getDisplayLocals.ts";
+} from "./getDisplayLocals.js";
 
 export default function (
   tableData: DisplayLocals[],

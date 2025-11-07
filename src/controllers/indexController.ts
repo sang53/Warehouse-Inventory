@@ -1,12 +1,12 @@
 import type { Response, Request, NextFunction } from "express";
-import { getCurrentTask } from "../services/tasks.ts";
-import getCurrentLocals from "../getLocals/getCurrentLocals.ts";
-import { AuthenticatedRequest } from "../middlewares/authenticate.ts";
-import Order, { ProductOrder } from "../models/ordersModel.ts";
-import Location from "../models/locationsModel.ts";
-import { FullTask } from "../models/tasksModel.ts";
-import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
-import extractKeys from "../utils/extractKeys.ts";
+import { getCurrentTask } from "../services/tasks.js";
+import getCurrentLocals from "../getLocals/getCurrentLocals.js";
+import { AuthenticatedRequest } from "../middlewares/authenticate.js";
+import Order, { ProductOrder } from "../models/ordersModel.js";
+import Location from "../models/locationsModel.js";
+import { FullTask } from "../models/tasksModel.js";
+import getDisplayLocals from "../getLocals/getDisplayLocals.js";
+import extractKeys from "../utils/extractKeys.js";
 
 export const indexGet = [
   async (_req: Request, res: Response, next: NextFunction) => {

@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import passport from "passport";
-import { AuthenticatedRequest } from "../middlewares/authenticate.ts";
-import { FullTask } from "../models/tasksModel.ts";
+import { AuthenticatedRequest } from "../middlewares/authenticate.js";
+import { FullTask } from "../models/tasksModel.js";
 
 export const loginGet = [
   (req: Request, res: Response) => {

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { palletsGet, palletsIDGet } from "../controllers/palletsController.ts";
+import { palletsGet, palletsIDGet } from "../controllers/palletsController.js";
 
 const palletsRouter = Router();
 

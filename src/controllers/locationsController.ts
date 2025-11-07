@@ -1,11 +1,11 @@
 import type { NextFunction, Request, Response } from "express";
-import Location from "../models/locationsModel.ts";
-import { checkValidation, validateInt } from "../middlewares/validate.ts";
+import Location from "../models/locationsModel.js";
+import { checkValidation, validateInt } from "../middlewares/validate.js";
 import { matchedData } from "express-validator";
-import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
-import getLocationLocals from "../getLocals/getLocationLocals.ts";
-import { FullTask } from "../models/tasksModel.ts";
-import extractKeys from "../utils/extractKeys.ts";
+import getDisplayLocals from "../getLocals/getDisplayLocals.js";
+import getLocationLocals from "../getLocals/getLocationLocals.js";
+import { FullTask } from "../models/tasksModel.js";
+import extractKeys from "../utils/extractKeys.js";
 
 export const locationsGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
