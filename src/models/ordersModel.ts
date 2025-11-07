@@ -64,9 +64,13 @@ export default class Order {
   }
 
   static async getByTask(t_id: number, client?: PoolClient) {
-    const [orderData] = await GeneralModel.get("o_t", {
-      conditions: { t_id },
-    });
+    const [orderData] = await GeneralModel.get(
+      "o_t",
+      {
+        conditions: { t_id },
+      },
+      client,
+    );
 
     if (!orderData) {
       console.error(`Task ${String(t_id)} not associated with order`);

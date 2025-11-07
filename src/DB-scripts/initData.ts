@@ -27,7 +27,3 @@ export async function initData() {
     client.release();
   }
 }
-
-if (import.meta.url === `file://${process.argv[1] as string}`) {
-  await initData();
-}

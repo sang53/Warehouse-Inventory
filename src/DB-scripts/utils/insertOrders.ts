@@ -2,7 +2,7 @@ import { PoolClient } from "pg";
 import { createOrder } from "../../services/orders.js";
 import randInt from "./randInt.js";
 
-const numOrders = 10 as const;
+const numOrders = 5 as const;
 const maxProducts = 5;
 const maxStock = 5;
 

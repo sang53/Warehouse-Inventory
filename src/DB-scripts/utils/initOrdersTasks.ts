@@ -4,6 +4,7 @@ import progressOrders from "./progressOrders.js";
 import User from "../../models/usersModel.js";
 import randInt from "./randInt.js";
 
+const minIterations = 3;
 const maxIterations = 5;
 
 export default async function (
@@ -11,7 +12,7 @@ export default async function (
   pIds: number[],
   users: User[],
 ) {
-  const iterations = randInt(maxIterations);
+  const iterations = randInt(maxIterations, minIterations);
   const taskUsers = users.filter(({ u_role }) => u_role !== "admin");
 
   for (let i = 0; i < iterations; i++) {
