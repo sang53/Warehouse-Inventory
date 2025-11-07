@@ -4,20 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title><%= title %></title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/form.css">
   </head>
-    <body>
-      <%- include ("partials/header.ejs") %>
-      <div class="main">
-        <h1><%= title %></h1>
-        <form action="<%= action %>" method="post">
-          <% formData.forEach((field, idx) => { %>
-            <label for="<%= `input-${idx}` %>"><%= field.text %></label>
+  <body>
+    <%- include ("partials/header.ejs") %>
+    <div class="flex-column-center">
+      <h1><%= title %></h1>
+      <form action="<%= action %>" method="post" class="flex-column-center">
+        <% formData.forEach((field, idx) => { %>
+          <div class="field">          
+            <label for="<%= `input-${idx}` %>"><%= field.text %>:</label>
             <input id="<%= `input-${idx}` %>" 
-              <%- field.inputAttributes %>
-            >
-          <% }); %>
-          <button type="submit">Submit</button>
-        </form>
-      </div>
-    </body>
+            <%- field.inputAttributes %>
+            / >
+        </div>
+        <% }); %>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </body>
 </html>

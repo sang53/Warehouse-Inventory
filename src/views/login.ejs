@@ -4,26 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Log In</title>
-    <body>
-      <div class="main">
-        <h1>Log In:</h1>
-        <div class="content">
-          <%- include("partials/error.ejs") %>
-          <form action="/login" method="POST">
-            <label for="username">Username:</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              required
-              autofocus
-            />
-            <label for="password">Password:</label>
-            <input type="password" name="password" id="password" required />
-            <button type="submit">Log In</button>
-          </form>
-        </div>
-      </div>
-    </body>
+    <link rel="stylesheet" href="/css/base.css" />
+    <link rel="stylesheet" href="/css/form.css" />
+    <link rel="stylesheet" href="/css/error.css" />
   </head>
+  <body>
+    <div class="flex-column-center" id="login-page">
+      <h1>Log In:</h1>
+      <div class="flex-column-center">
+        <%- include("partials/error.ejs") %>
+        <form action="/login" method="POST">
+          <label for="username">Username:</label>
+          <input type="text" id="username" name="username" required autofocus />
+          <label for="password">Password:</label>
+          <input type="password" name="password" id="password" required />
+          <button type="submit">Log In</button>
+        </form>
+      </div>
+    </div>
+  </body>
 </html>

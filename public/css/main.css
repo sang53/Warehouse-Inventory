@@ -1,0 +1,57 @@
+.options {
+  width: 100%;
+  display: flex;
+  margin-block: 1rem;
+
+  > * {
+    margin-inline: auto;
+  }
+}
+
+.details {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  margin-block: 1rem;
+}
+
+.table-container {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  gap: 2rem 1rem;
+  padding-block: 1rem;
+
+  > div {
+    min-width: 40%;
+  }
+}
+
+.table {
+  gap: 1rem;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+table,
+th,
+td {
+  border: 1px solid black;
+}
+
+th,
+td {
+  padding: 1rem;
+}
+
+th {
+  background-color: lightblue;
+}
+
+.empty {
+  color: red;
+  font-size: 1.25rem;
+}

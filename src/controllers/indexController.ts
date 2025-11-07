@@ -6,24 +6,43 @@ import Order, { ProductOrder } from "../models/ordersModel.ts";
 import Location from "../models/locationsModel.ts";
 import { FullTask } from "../models/tasksModel.ts";
 import getDisplayLocals from "../getLocals/getDisplayLocals.ts";
+import extractKeys from "../utils/extractKeys.ts";
 
 export const indexGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
-    const [inOrders, outOrders, tasks] = await Promise.all([
-      await Order.getByComplete(false, "IN"),
-      await Order.getByComplete(false, "OUT"),
-      await FullTask.getByComplete(false),
+    const [inOrders, outOrders, tasks, startedTasks] = await Promise.all([
+      Order.getByComplete(false, "IN"),
+      Order.getByComplete(false, "OUT"),
+      FullTask.getByComplete(false),
+      FullTask.getCurrentByUser(),
     ]);
+    const taskKeys = [
+      "t_id",
+      "t_type",
+      "placed",
+      "started",
+      "u_id",
+      "pa_id",
+      "l_id",
+      "o_id",
+    ] as const;
 
     res.locals = getDisplayLocals([
       {
-        title: "Current Tasks",
-        tableData: tasks,
+        title: "Started Tasks",
+        tableData: startedTasks.map((task) => extractKeys(task, taskKeys)),
       },
-      { title: "Current Incoming Orders", tableData: inOrders },
+      {
+        title: "Current Tasks",
+        tableData: tasks.map((task) => extractKeys(task, taskKeys)),
+      },
+      {
+        title: "Current Incoming Orders",
+        tableData: inOrders.map((order) => order.getTable(["o_id", "placed"])),
+      },
       {
         title: "Current Outgoing Orders",
-        tableData: outOrders,
+        tableData: outOrders.map((order) => order.getTable(["o_id", "placed"])),
       },
     ]);
     next();

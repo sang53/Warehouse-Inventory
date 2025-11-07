@@ -72,11 +72,11 @@ export const productsIDGet = [
         tableData: [product],
       },
       {
-        title: "Stock In Locations",
+        title: "Stock in Locations",
         tableData: inLocations,
       },
       {
-        title: "Floating Stock",
+        title: "Stock to Process",
         tableData: offLocations,
       },
     ]);

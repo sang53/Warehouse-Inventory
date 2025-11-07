@@ -15,7 +15,7 @@ const LTYPEMAP = {
 } as const;
 
 export async function getCurrentTask(user: User, client?: PoolClient) {
-  const currentTask = await FullTask.getCurrentByUser(user.u_id, client);
+  const [currentTask] = await FullTask.getCurrentByUser(user.u_id, client);
   if (currentTask) return currentTask;
 
   const USER_TASK_MAP: Record<UserType, TaskType[]> = {

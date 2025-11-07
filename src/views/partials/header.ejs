@@ -1,16 +1,40 @@
 <header>
-  <h1>Warehouse Inventory</h1>
   <nav>
-    <ul>
-      <li><a href="/">Index</a></li>
-      <li><a href="/products">Products</a></li>
-      <li><a href="/locations">Locations</a></li>
-      <li><a href="/pallets">Pallets</a></li>
-      <li><a href="/tasks">Tasks</a></li>
-      <li><a href="/orders">Orders</a></li>
-      <li><a href="/users">Users</a></li>
-      <li><a href="/login">Log In</a></li>
-      <li><a href="/logout">Log Out</a></li>
-    </ul>
+    <div class="dropdown-menu">
+      <a href="/">Home</a>
+      <div class="dropdown flex-column-center">
+        <a href="/current">Current Task</a>
+      </div>
+    </div>
+    <div class="dropdown-menu">
+      <a href="/products">Products</a>
+      <div class="dropdown flex-column-center">
+        <a href="/products/new">Add New Product</a>
+      </div>
+    </div>
+    <div><a href="/locations">Locations</a></div>
+    <div><a href="/pallets">Pallets</a></div>
+    <div class="dropdown-menu">
+      <a href="/tasks">Tasks</a>
+      <div class="dropdown flex-column-center">
+        <a href="/tasks/complete">Completed Tasks</a>
+        <a href="/tasks/incomplete">Incomplete Tasks</a>
+      </div>
+    </div>
+    <div class="dropdown-menu">
+      <a href="/orders">Orders</a>
+      <div class="dropdown flex-column-center">
+        <a href="/orders/complete">Completed Orders</a>
+        <a href="/orders/incomplete">Incomplete Orders</a>
+        <a href="/orders/new">Add New Order</a>
+      </div>
+    </div>
+    <div class="dropdown-menu">
+      <a href="/users">Users</a>
+      <div class="dropdown flex-column-center">
+        <a href="/users/new">Add New User</a>
+      </div>
+    </div>
+    <div><a href="/logout">Log Out</a></div>
   </nav>
 </header>

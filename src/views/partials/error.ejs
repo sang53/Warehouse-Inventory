@@ -1,10 +1,10 @@
-<% if (errors && errors.length) { %>
-  <div class="error">
-    <h1>Error: </h1>
-    <ul>
-      <% errors.forEach((e) => { %>
-        <li><%= e %></li>
+<% if (errors.length) { %>
+<div class="error flex-column-center">
+  <h1>Error/s: </h1>
+  <ul>
+    <% errors.forEach((e) => { %>
+      <li><%= e %></li>
     <% }); %>
-    </ul>
-  </div>
-<% } %>
+  </ul>
+</div>
+<% }; %>

@@ -37,7 +37,7 @@ export const loginPost = [
 export const logoutGet = [
   async (req: Request, res: Response) => {
     const user = (req as AuthenticatedRequest).user;
-    const task = await FullTask.getCurrentByUser(user.u_id);
+    const [task] = await FullTask.getCurrentByUser(user.u_id);
 
     if (task) await task.cancelTask();
     req.logOut(() => {

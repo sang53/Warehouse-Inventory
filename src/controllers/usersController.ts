@@ -36,7 +36,7 @@ export const usersGet = [
     async function addCurrentTaskOrder(user: User) {
       const plainUser = extractKeys(user, ["u_id", "u_name", "u_role"]);
 
-      const task = await FullTask.getCurrentByUser(user.u_id);
+      const [task] = await FullTask.getCurrentByUser(user.u_id);
       if (!task) return { ...plainUser, t_id: null, o_id: null } as const;
 
       const { o_id } = await Order.getByTask(task.t_id);
@@ -59,7 +59,7 @@ export const usersIDGet = [
     const tasks = await FullTask.getByRels({ u_id: id }, null);
 
     // retrieve current task
-    const currentTask = await FullTask.getCurrentByUser(user.u_id);
+    const [currentTask] = await FullTask.getCurrentByUser(user.u_id);
     const t_id = currentTask ? currentTask.t_id : null;
 
     res.locals = getUserLocals({ user, t_id, tasks });

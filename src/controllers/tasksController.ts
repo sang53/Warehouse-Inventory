@@ -13,6 +13,7 @@ import { ProductOrder } from "../models/ordersModel.ts";
 import mapToView from "../utils/mapToView.ts";
 import getTaskLocals from "../getLocals/getTaskLocals.ts";
 import User from "../models/usersModel.ts";
+import extractKeys from "../utils/extractKeys.ts";
 
 export const tasksGet = [
   async (_req: Request, res: Response, next: NextFunction) => {
@@ -65,18 +66,29 @@ export const taskIncompleteGet = [
       FullTask.getByComplete(false, ["outgoing", "export"]),
     ]);
 
+    const displayKeys = [
+      "t_id",
+      "t_type",
+      "placed",
+      "started",
+      "pa_id",
+      "l_id",
+      "u_id",
+      "o_id",
+    ] as const;
+
     res.locals = getDisplayLocals([
       {
         title: "Incoming Tasks",
-        tableData: inTask,
+        tableData: inTask.map((task) => extractKeys(task, displayKeys)),
       },
       {
         title: "Picking Tasks",
-        tableData: pickTask,
+        tableData: pickTask.map((task) => extractKeys(task, displayKeys)),
       },
       {
         title: "Outgoing Tasks",
-        tableData: outTask,
+        tableData: outTask.map((task) => extractKeys(task, displayKeys)),
       },
     ]);
     next();

@@ -11,7 +11,7 @@
   function addNewInputs() {
     const div = document.createElement("div");
     div.innerHTML = `
-          <label for="product-${curr}">Product ID</label>
+          <label for="product-${curr}">Product ID:</label>
           <input
             id="product-${curr}"
             type="number"
@@ -20,7 +20,7 @@
             min="1"
             required
           />
-          <label for="stock-${curr}">Amount</label>
+          <label for="stock-${curr}">Amount:</label>
           <input
             id="stock-${curr}"
             type="number"

@@ -227,20 +227,22 @@ export class FullTask extends Task {
     return new FullTask(task, rels);
   }
 
-  static async getCurrentByUser(u_id: number, client?: PoolClient) {
+  static async getCurrentByUser(u_id?: number, client?: PoolClient) {
     const query = `
       SELECT * FROM tasks a
       JOIN taskRels b
       ON a.t_id = b.t_id
-      WHERE b.u_id = $1
-      AND a.completed IS NULL;`;
+      WHERE a.started IS NOT NULL
+      AND a.completed IS NULL
+      ${u_id ? "AND b.u_id = $1" : ""};`;
 
     const connection = client ?? db;
 
-    const {
-      rows: [taskData],
-    } = await connection.query<OutFullTask>(query, [u_id]);
-    return taskData ? new FullTask(taskData, taskData) : null;
+    const { rows } = await connection.query<OutFullTask>(
+      query,
+      u_id ? [u_id] : [],
+    );
+    return rows.map((taskData) => new FullTask(taskData, taskData));
   }
 
   static async getByLocation(l_id: number, limit: number = 1) {

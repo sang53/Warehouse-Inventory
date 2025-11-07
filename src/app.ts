@@ -20,9 +20,14 @@ import { ensureAuthenticated } from "./middlewares/authenticate.ts";
 
 const app = express();
 
-// view engine setup & body parser
+// set up public directory
+app.use(express.static("public"));
+
+// view engine setup
 app.set("views", path.join(import.meta.dirname, "views"));
 app.set("view engine", "ejs");
+
+// POST body parser
 app.use(express.urlencoded({ extended: true }));
 
 // connect-pg-simple

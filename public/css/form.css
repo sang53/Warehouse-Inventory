@@ -1,0 +1,28 @@
+form {
+  min-width: 50%;
+  padding: 1rem 2rem;
+  border: 1px solid black;
+  gap: 2rem;
+  margin-block: 1rem;
+}
+
+input {
+  margin-left: 0.25rem;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 35ch;
+}
+
+fieldset {
+  padding: 1rem;
+
+  > input {
+    margin-right: 1rem;
+  }
+}
+
+#login-page {
+  padding: 3rem;
+}

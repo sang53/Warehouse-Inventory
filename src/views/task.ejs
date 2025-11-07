@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Warehouse Inventory</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/main.css">
   </head>
   <body>
     <%- include ("partials/header.ejs") %>
@@ -11,16 +14,22 @@
       <%- include ("partials/search.ejs") %>
       <%- include ("partials/addBtn.ejs") %>
     </div>
-    <div class="main">
-      <form action="/tasks/id/<%= t_id %>" method="post">
-        <label for="u_id">User ID:</label>
-        <input type="number" name="u_id" id="u_id" autofocus placeholder="Leave empty for self">
-        <button type="submit">Set Complete (admin only)</button>
-      </form>
-      <% tables.forEach(({title, tableData}) => { %>
-        <h1><%= title %></h1>
-        <%- include("partials/table.ejs", { tableData }) %>
-      <% }) %>
+    <div class="flex-column-center">
+      <div class="options">
+        <form action="/tasks/id/<%= t_id %>" method="post">
+          <label for="u_id">User ID:</label>
+          <input type="number" name="u_id" id="u_id" autofocus placeholder="Self">
+          <button type="submit">Set Complete (admin only)</button>
+        </form>
+      </div>
+      <div class="table-container">
+        <% tables.forEach(({title, tableData}) => { %>
+          <div class="table">
+            <h1 class="table-title"><%= title %></h1>
+            <%- include("partials/table.ejs", { tableData }) %>
+          </div>
+        <% }) %>
+      </div>
     </div>
   </body>
 </html>
