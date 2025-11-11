@@ -1,3 +1,11 @@
+a {
+  font-size: 1.5rem;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+  color: black;
+}
+
 header {
   width: 100%;
   position: sticky;
@@ -15,14 +23,8 @@ nav {
     padding-block: 1rem;
 
     background-color: lightblue;
-    color: black;
     border-inline: 1px solid black;
     border-bottom: 1px solid black;
-
-    font-size: 1.5rem;
-    text-align: center;
-    text-decoration: none;
-    font-weight: 600;
 
     &:hover {
       background-color: white;
