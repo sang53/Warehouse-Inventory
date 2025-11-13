@@ -65,6 +65,12 @@ h6 {
   min-height: 100vh;
 }
 
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .flex-column-center,
 .table {
   display: flex;
@@ -96,12 +102,20 @@ label {
   font-size: 1.25rem;
 }
 
+a {
+  font-size: 1.5rem;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 600;
+  color: black;
+}
+
 .footer {
   width: 100%;
   display: flex;
   justify-content: space-around;
 
-  margin-top: 2rem;
+  margin-top: auto;
   border-top: 1px solid black;
   padding-block: 1rem;
 

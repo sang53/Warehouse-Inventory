@@ -191,8 +191,7 @@ export class FullTask extends Task {
       "b",
       { conditions: data, limit },
     );
-    const tasks = output.map((task) => new FullTask(task, task));
-    return GeneralModel.parseOutput(tasks, "Task Not Found");
+    return output.map((task) => new FullTask(task, task));
   }
 
   static async getByComplete(
