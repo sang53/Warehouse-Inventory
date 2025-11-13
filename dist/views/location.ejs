@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Warehouse Inventory</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/main.css">
+  </head>
+  <body>
+    <div class="flex-column-center">
+      <%- include("partials/header.ejs") %>
+      <div class="details">
+        <h2>Reserved for task: <%= t_id %></h2>
+      </div>
+      <div class="table-container">
+        <div class="table">
+          <h1 class="table-title">Location <%= location.l_id %></h1>
+          <%- include("partials/table.ejs", { tableData: [location] }) %>
+        </div>
+      </div>
+    </div>
+    <%- include("partials/footer.ejs") %> 
+  </body>
+</html>

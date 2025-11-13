@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>User <%= user.u_id %></title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/main.css">
+  </head>
+  <body>
+    <%- include("partials/header.ejs") %>
+    <div class="flex-column-center">
+      <div class="details">
+        <h1>Current Task: <%= t_id ?? "None" %></h1>
+      </div>
+      <div class="table-container">
+        <div class="table">
+          <h1>User <%= user.u_id %></h1>
+          <%- include("partials/table.ejs", { tableData: [user] }) %>
+        </div>
+      </div>
+      <div class="table">
+        <h1>Previous Tasks:</h1>
+        <%- include("partials/table.ejs", { tableData: tasks }) %>
+      </div>
+    </div>
+    <%- include("partials/footer.ejs") %> 
+  </body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Warehouse Inventory</title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/main.css">
+  </head>
+  <body>
+    <%- include ("partials/header.ejs") %>
+    <div class="flex-column-center">
+      <div class="options">
+        <%- include ("partials/search.ejs") %>
+        <%- include ("partials/addBtn.ejs") %>
+      </div>
+      <div class="table-container">
+        <% tables.forEach(({title, tableData}) => { %>
+          <div class="table">
+            <h1 class="table-title"><%= title %></h1>
+            <%- include("partials/table.ejs", { tableData }) %>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+    <%- include("partials/footer.ejs") %> 
+  </body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>User <%= user.u_id %>: Task <%= task.t_id %></title>
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/main.css">
+  </head>
+  <body>
+    <%- include("partials/header.ejs") %>
+    <div class="flex-column-center">
+      <div class="details">
+        <h2>Name: <%= user.u_name %></h2>
+        <h2>Role: <%= user.u_role %></h2>
+        <h2>User ID: <%= user.u_id %></h2>
+        <h2>Current Location: <%= l_name %></h2>
+        <h2>Current Order: <%= o_id %></h2>
+      </div>
+      <form action="/tasks/id/<%= task.t_id %>" method="post">
+        <button type="submit">Complete Task</button>
+      </form>
+      <div class="table-container">
+        <div class="table">
+          <h1>Current Task:</h1>
+          <%- include("partials/table.ejs", { tableData: [task] }) %>
+        </div>
+        <div class="table">
+          <h1>Products:</h1>
+          <%- include("partials/table.ejs", { tableData: products.data }) %>        
+        </div>
+        <div class="table">
+          <h1>Missing Products:</h1>
+          <%- include("partials/table.ejs", { tableData: products.missing }) %>
+        </div>
+      </div>
+    </div>
+    <%- include("partials/footer.ejs") %>    
+  </body>
+</html>

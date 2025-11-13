@@ -1,0 +1,10 @@
+<% if (errors.length) { %>
+<div class="error flex-column-center">
+  <h1>Error/s: </h1>
+  <ul>
+    <% errors.forEach((e) => { %>
+      <li><%= e %></li>
+    <% }); %>
+  </ul>
+</div>
+<% }; %>

@@ -1,0 +1,22 @@
+<% if (tableData && tableData.length) { %>
+<table>
+  <thead>
+    <tr>
+      <% Object.keys(tableData[0]).forEach((key) => { %>
+        <th><%= key %></th>
+      <% }); %>
+    </tr>
+  </thead>
+  <tbody>
+    <% tableData.forEach(row => { %>
+    <tr>
+      <% Object.values(row).forEach((value) => { %>
+        <td><%= value %></td>
+      <% }); %>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% }  else { %>
+<span class="empty">N/A</span>
+<% } %>
